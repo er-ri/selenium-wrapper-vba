@@ -1,0 +1,2 @@
+# SeleniumWrapperVBA
+スタンドアロンのSelenium-WebDriverベースのVBAブラウザー自動化フレームワーク
