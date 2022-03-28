@@ -58,11 +58,11 @@ Public Sub Click()
     driver.ElementClick Me
 End Sub
 
-Public Function GetAttribute()
-    GetAttribute = driver.GetElementAttribute
+Public Function GetAttribute(ByVal name As String)
+    GetAttribute = driver.GetElementAttribute(Me, name)
 End Function
 
-Public Function GetText() As String
+Public Function GetText()
     GetText = driver.GetElementText(Me)
 End Function
 
