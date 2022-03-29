@@ -255,15 +255,15 @@ End Sub
 | Get Element Shadow Root        | Not yet                 |                       |
 | Find Element                   | FindElement             |                       |
 | Find Elements                  | FindElements            |                       |
-| Find Element From Element      | FindElementFromElement  |                       |
-| Find Elements From Element     | FindElementsFromElement |                       |
+| Find Element From Element      | FindElementFromElement  | FindElement           |
+| Find Elements From Element     | FindElementsFromElement | FindElements          |
 | Find Element From Shadow Root  | Not yet                 |                       |
 | Find Elements From Shadow Root | Not yet                 |                       |
 | Is Element Selected            | Not yet                 |                       |
 | Get Element Attribute          | GetElementAttribute     | GetAttribute          |
 | Get Element Property           | Not yet                 |                       |
 | Get Element CSS Value          | Not yet                 |                       |
-| Get Element Text               | GetElementText          |                       |
+| Get Element Text               | GetElementText          | GetText               |
 | Get Element Tag Name           | Not yet                 |                       |
 | Get Element Rect               | Not yet                 |                       |
 | Is Element Enabled             | Not yet                 |                       |
