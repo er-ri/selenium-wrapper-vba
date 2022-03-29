@@ -108,7 +108,7 @@ End Sub
     Dim elementRoot As WebElement
     Set elementRoot = driver.FindElement(By.ID, "root1")
     Dim elementChildren() As WebElement
-    elementChildren() = driver.FindElementFromElement(elmentRoot, By.TagName, "p")
+    elementChildren() = driver.FindElementsFromElement(elmentRoot, By.TagName, "p")
 ```
 
 ### Timeouts
