@@ -23,6 +23,7 @@ A standalone Selenium-WebDriver-based browser automation framework implemented f
         <li><a href="#take-element-screenshot">Take Element Screenshot</a></li>
         <li><a href="#enable-edge-ie-mode">Enable Edge IE-mode</a></li>
         <li><a href="#headless-mode">Headless mode</a></li>
+        <li><a href="#customize-user-agent">Customize User-Agent</a></li>
       </ul>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#license">License</a></li>
@@ -223,6 +224,19 @@ End Sub
 
     driver.Firefox "C:\WebDriver\Firefox\geckodriver.exe"
     driver.OpenBrowser firefoxOptions
+```
+
+### Customize User-Agent
+#### Customize User-Agent in Chrome
+```vba
+    Dim driver As New WebDriver
+    Dim chromeOptions As New Options
+    
+    driver.Chrome
+    chromeOptions.BrowserType = Chrome
+    chromeOptions.ChromeArguments.Add "--user-agent=my customized user-agent"
+    driver.OpenBrowser chromeOptions
+    driver.NavigateTo "https://www.whatismybrowser.com/detect/what-is-my-user-agent/"
 ```
 
 ## Roadmap
