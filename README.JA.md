@@ -35,21 +35,21 @@
 
 ## Requirements
 1. エクセル３２ビット又は６４ビット
-2. ブラウザのウェブドライバ(サポートするブラウザ: Firefox, Chrome, Edge と Internet Explorer)
+2. ブラウザのウェブドライバ（サポートするブラウザ：Firefox、Chrome、EdgeとInternet Explorer）
 
 ## Getting Started
-1. ブラウザのウェブドライバをダウンロードする, [`geckodriver`](https://github.com/mozilla/geckodriver/releases),
+1. ブラウザのウェブドライバをダウンロードする、[`geckodriver`](https://github.com/mozilla/geckodriver/releases),
 [`chromedriver`](https://chromedriver.chromium.org/), 
 [`edgedriver`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
 [`iedriver`](https://www.selenium.dev/downloads/)
 2. `Options.cls`、 `WebDriver.cls`、 `WebElement.cls`と`JsonConverter.bas`をエクセルにインポートする。(Open VBA Editor, `Alt + F11`; File > Import File) 
-   * `JsonConverter.bas`は[`ここ`](https://github.com/VBA-tools/VBA-JSON/blob/master/JsonConverter.bas)からダウンロードできます。
+   * `JsonConverter.bas`は[`こちら`](https://github.com/VBA-tools/VBA-JSON/blob/master/JsonConverter.bas)からダウンロードできます。
 3. プロジェクト参照のところに"Microsoft Scripting Runtime"をチェックする。(Tools->References Check "`Microsoft Scripting Runtime`")
 
 #### Note
 * ウェブドライバのディレクトリを`PATH`に設定する。　設定しなかったらブラウザを起動するときにドライバの絶対パスを指定することもできます。
 * エラーが発生するときにエラーメッセージが同ワークブックのフォルダに"log4driver{YYYY-MM-DD}.txt"というログファイルが作られます。{YYYY-MM-DD}は本日の日付です。
-* `iedriver`を使用する前に設定が必要です。具体的な設定手順は[ここ](https://www.selenium.dev/documentation/ie_driver_server/#required-configuration)です。（英語）
+* `iedriver`を使用する前に設定が必要です。具体的な設定手順は[こちら](https://www.selenium.dev/documentation/ie_driver_server/#required-configuration)です。（英語）
  
 #### Example
 ```vba
@@ -225,10 +225,10 @@ End Sub
 ```
 
 ## License
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+MITライセンス。詳細は`LICENSE.txt`を確認してください.
 
 ## Contribution
-Any suggestions for improvement or contribution to this project are appreciated! Creating an issue or pull request!
+ご意見やご不明な点がございましたら、お気軽に問い合わせください。
 
 ## References
 1. W3C WebDriver Working Draft:
