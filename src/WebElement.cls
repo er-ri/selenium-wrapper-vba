@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.0
+' SeleniumWrapperVBA v1.0.1
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -46,6 +46,17 @@ End Property
 '------------------------------------------------------------------
 ' Element Command
 '------------------------------------------------------------------
+Public Function FindElement(ByVal by_strategy As By, _
+                            ByVal target As String) As WebElement
+    Set FindElement = driver.FindElementFromElement(Me, by_strategy, target)
+End Function
+
+Public Function FindElements(ByVal element As WebElement, _
+                             ByVal by_strategy As By, _
+                             ByVal target As String) As Variant
+    FindElements = driver.FindElementsFromElement(Me, by_strategy, target)
+End Function
+
 Public Sub SendKeys(text As String)
     driver.ElementSendKeys text, Me
 End Sub
