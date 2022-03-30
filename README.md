@@ -23,6 +23,7 @@ A standalone Selenium-WebDriver-based browser automation framework implemented f
         <li><a href="#take-element-screenshot">Take Element Screenshot</a></li>
         <li><a href="#enable-edge-ie-mode">Enable Edge IE-mode</a></li>
         <li><a href="#headless-mode">Headless mode</a></li>
+        <li><a href="#customize-user-agent">Customize User-Agent</a></li>
       </ul>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#license">License</a></li>
@@ -44,7 +45,7 @@ The project implements the `endpoint node command` defined in [W3C WebDriver spe
 [`edgedriver`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
 [`iedriver`](https://www.selenium.dev/downloads/)
 2. Import `Options.cls`, `WebDriver.cls`, `WebElement.cls` and `JsonConverter.bas` into your Excel. (Open VBA Editor, `Alt + F11`; File > Import File) 
-   * where `JsonConverter.bas` could be found at [`here`](https://github.com/VBA-tools/VBA-JSON/blob/master/JsonConverter.bas)
+   * where `JsonConverter.bas`, a JSON Parser for VBA created and maintained by [@timhall](https://github.com/timhall). For more details, see [`here`](https://github.com/VBA-tools/VBA-JSON).
 3. Include a reference to "Microsoft Scripting Runtime". (Tools->References Check "`Microsoft Scripting Runtime`")
 
 #### Note
@@ -108,7 +109,7 @@ End Sub
     Dim elementRoot As WebElement
     Set elementRoot = driver.FindElement(By.ID, "root1")
     Dim elementChildren() As WebElement
-    elementChildren() = driver.FindElementFromElement(elmentRoot, By.TagName, "p")
+    elementChildren() = driver.FindElementsFromElement(elmentRoot, By.TagName, "p")
 ```
 
 ### Timeouts
@@ -225,6 +226,19 @@ End Sub
     driver.OpenBrowser firefoxOptions
 ```
 
+### Customize User-Agent
+#### Customize User-Agent in Chrome
+```vba
+    Dim driver As New WebDriver
+    Dim chromeOptions As New Options
+    
+    driver.Chrome
+    chromeOptions.BrowserType = Chrome
+    chromeOptions.ChromeArguments.Add "--user-agent=my customized user-agent"
+    driver.OpenBrowser chromeOptions
+    driver.NavigateTo "https://www.whatismybrowser.com/detect/what-is-my-user-agent/"
+```
+
 ## Roadmap
 | Endpoint Node   Command        | Function Name           | Element Function Name |
 |--------------------------------|-------------------------|-----------------------|
@@ -255,15 +269,15 @@ End Sub
 | Get Element Shadow Root        | Not yet                 |                       |
 | Find Element                   | FindElement             |                       |
 | Find Elements                  | FindElements            |                       |
-| Find Element From Element      | FindElementFromElement  |                       |
-| Find Elements From Element     | FindElementsFromElement |                       |
+| Find Element From Element      | FindElementFromElement  | FindElement           |
+| Find Elements From Element     | FindElementsFromElement | FindElements          |
 | Find Element From Shadow Root  | Not yet                 |                       |
 | Find Elements From Shadow Root | Not yet                 |                       |
 | Is Element Selected            | Not yet                 |                       |
 | Get Element Attribute          | GetElementAttribute     | GetAttribute          |
 | Get Element Property           | Not yet                 |                       |
 | Get Element CSS Value          | Not yet                 |                       |
-| Get Element Text               | GetElementText          |                       |
+| Get Element Text               | GetElementText          | GetText               |
 | Get Element Tag Name           | Not yet                 |                       |
 | Get Element Rect               | Not yet                 |                       |
 | Is Element Enabled             | Not yet                 |                       |
