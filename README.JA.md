@@ -43,7 +43,7 @@
 [`edgedriver`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
 [`iedriver`](https://www.selenium.dev/downloads/)
 2. `Options.cls`、 `WebDriver.cls`、 `WebElement.cls`と`JsonConverter.bas`をエクセルにインポートする。(Open VBA Editor, `Alt + F11`; File > Import File) 
-   * `JsonConverter.bas`は[`こちら`](https://github.com/VBA-tools/VBA-JSON/blob/master/JsonConverter.bas)からダウンロードできます。
+   * `JsonConverter.bas`は[@timhall](https://github.com/timhall)のプロジェクトとなります。詳細は[`こちら`](https://github.com/VBA-tools/VBA-JSON)に確認してください。
 3. プロジェクト参照のところに"Microsoft Scripting Runtime"をチェックする。(Tools->References Check "`Microsoft Scripting Runtime`")
 
 #### Note
