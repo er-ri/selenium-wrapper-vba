@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.1
+' SeleniumWrapperVBA v1.0.2
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -192,86 +192,38 @@ End Sub
 '------------------------------------------------------------------
 Public Sub Edge(Optional ByVal driverPath As String = "msedgedriver.exe", _
                 Optional ByVal port As Integer = 9516)
-    On Error GoTo ErrorHandler
-    If StrComp(PID, vbNullString) <> 0 Then
-        Err.Raise vbObjectError + 513, "Edge", "WebDriver has been launched."
-    End If
-    
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " --port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    LaunchWebDriver cmdLaunch
-
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    PID = Shell(driverPath, vbMinimizedNoFocus)
 End Sub
 
 Public Sub Chrome(Optional ByVal driverPath As String = "chromedriver.exe", _
                   Optional ByVal port As Integer = 9515)
-    On Error GoTo ErrorHandler
-    If StrComp(PID, vbNullString) <> 0 Then
-        Err.Raise vbObjectError + 513, "Chrome", "WebDriver has been launched."
-    End If
-    
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " --port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    LaunchWebDriver cmdLaunch
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    PID = Shell(driverPath, vbMinimizedNoFocus)
 End Sub
 
 Public Sub Firefox(Optional ByVal driverPath As String = "geckodriver.exe", _
                    Optional ByVal port As Integer = 4444)
-    On Error GoTo ErrorHandler
-    If StrComp(PID, vbNullString) <> 0 Then
-        Err.Raise vbObjectError + 513, "Firefox", "WebDriver has been launched."
-    End If
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " --port " & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    LaunchWebDriver cmdLaunch
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    PID = Shell(driverPath, vbMinimizedNoFocus)
 End Sub
 
 Public Sub InternetExplorer(Optional ByVal driverPath As String = "IEDriverServer.exe", _
                             Optional ByVal port = 5555)
-    On Error GoTo ErrorHandler
-    If StrComp(PID, vbNullString) <> 0 Then
-        Err.Raise vbObjectError + 513, "InternetExplorer", "WebDriver has been launched."
-    End If
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " /port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    LaunchWebDriver cmdLaunch
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
-End Sub
-
-Private Sub LaunchWebDriver(ByVal driverPath As String)
-    On Error GoTo ErrorHandler
-    
     PID = Shell(driverPath, vbMinimizedNoFocus)
-    
-    If PID = 0 Then
-        Err.Raise vbObjectError + 513, "WebDriver", "Failure to launch WebDriver."
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
 End Sub
 
 Public Sub Quit()
@@ -284,8 +236,6 @@ End Sub
 '------------------------------------------------------------------
 ' Optimize for similar commands?
 Public Sub OpenBrowser(Optional ByVal browserOptions As Options = Nothing)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -297,17 +247,8 @@ Public Sub OpenBrowser(Optional ByVal browserOptions As Options = Nothing)
     End If
     
     Set responseBody = SendCommand2Webdriver(W3C_NEW_SESSION, urlParameters, requestBody)
-    
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "OpenBrowser", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
+
     Capabilities = responseBody("value")
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
-    End
 End Sub
 
 Public Sub CloseBrowser()
@@ -343,52 +284,28 @@ End Function
 Public Sub SetTimeouts(Optional ByVal script As Long = 30000, _
                             Optional ByVal pageLoad As Long = 300000, _
                             Optional ByVal implicit As Long = 0)
-    On Error GoTo ErrorHandler
-        
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
-    
+        requestBody As New Dictionary
+        
     urlParameters.Add "{session id}", Capabilities("sessionId")
     requestBody.Add "script", script
     requestBody.Add "pageLoad", pageLoad
     requestBody.Add "implicit", implicit    ' a time to wait in milliseconds for the element location strategy
     
-    Set responseBody = SendCommand2Webdriver(W3C_SET_TIMEOUTS, urlParameters, requestBody)
-        
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "SetTimeouts", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_SET_TIMEOUTS, urlParameters, requestBody
 End Sub
 
 Public Sub NavigateTo(ByVal url As String)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
-    
+        requestBody As New Dictionary
+        
     urlParameters.Add "{session id}", Capabilities("sessionId")
     requestBody.Add "url", url
     
-    Set responseBody = SendCommand2Webdriver(W3C_GO, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "NavigateTo", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_GO, urlParameters, requestBody
 End Sub
 
 Public Function GetCurrentURL() As String
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -397,80 +314,37 @@ Public Function GetCurrentURL() As String
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_CURRENT_URL, urlParameters, requestBody)
     
-    If TypeName(responseBody("value")) <> "String" Then
-        Err.Raise vbObjectError + 513, "NavigateTo", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     GetCurrentURL = responseBody("value")
-    Exit Function
-ErrorHandler:
-    GetCurrentURL = Null
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Sub Back()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
-    
+        requestBody As New Dictionary
+        
     urlParameters.Add "{session id}", Capabilities("sessionId")
     
-    Set responseBody = SendCommand2Webdriver(W3C_BACK, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "Back", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_BACK, urlParameters, requestBody
 End Sub
 
 Public Sub Forward()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
     
     urlParameters.Add "{session id}", Capabilities("sessionId")
     
-    Set responseBody = SendCommand2Webdriver(W3C_FORWARD, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "Forward", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_FORWARD, urlParameters, requestBody
 End Sub
 
 Public Sub Refresh()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
     
     urlParameters.Add "{session id}", Capabilities("sessionId")
     
-    Set responseBody = SendCommand2Webdriver(W3C_REFRESH, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "Refresh", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_REFRESH, urlParameters, requestBody
 End Sub
 
 Public Function GetTitle() As String
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -479,20 +353,10 @@ Public Function GetTitle() As String
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_TITLE, urlParameters, requestBody)
     
-    If TypeName(responseBody("value")) <> "String" Then
-        Err.Raise vbObjectError + 513, "GetTitle", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     GetTitle = responseBody("value")
-    Exit Function
-ErrorHandler:
-    GetTitle = Null
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function GetWindowHandle()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -500,62 +364,28 @@ Public Function GetWindowHandle()
     urlParameters.Add "{session id}", Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_WINDOW_HANDLE, urlParameters, requestBody)
-
-    If TypeName(responseBody("value")) <> "String" Then
-        Err.Raise vbObjectError + 513, "GetWindowHandle", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
     
     GetWindowHandle = responseBody("value")
-    
-    Exit Function
-ErrorHandler:
-    GetWindowHandle = Null
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Sub CloseWindow()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
     
     urlParameters.Add "{session id}", Capabilities("sessionId")
     
-    Set responseBody = SendCommand2Webdriver(W3C_CLOSE_WINDOW, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "CloseWindow", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_CLOSE_WINDOW, urlParameters, requestBody
 End Sub
 
-Public Function SwitchToWindow(ByVal handle As String) As Boolean
-    On Error GoTo ErrorHandler
-    
+Public Sub SwitchToWindow(ByVal handle As String)
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
     
     urlParameters.Add "{session id}", Capabilities("sessionId")
     requestBody.Add "handle", handle
 
-    Set responseBody = SendCommand2Webdriver(W3C_SWITCH_TO_WINDOW, urlParameters, requestBody)
-
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "SwitchToWindow", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    SwitchToWindow = True
-    
-    Exit Function
-ErrorHandler:
-    SwitchToWindow = False
-    Log4Driver Err.Source, Err.Description
-End Function
+    SendCommand2Webdriver W3C_SWITCH_TO_WINDOW, urlParameters, requestBody
+End Sub
 
 Public Function GetWindowHandles()
     Dim urlParameters As New Dictionary, _
@@ -573,8 +403,6 @@ End Function
 ' "handle": The value of handle.
 ' "type": Let type be "tab" if the newly created window shares an OS-level window with the current browsing context, or "window" otherwise.
 Public Function NewWindow() As Dictionary
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -583,20 +411,10 @@ Public Function NewWindow() As Dictionary
     
     Set responseBody = SendCommand2Webdriver(W3C_NEW_WINDOW, urlParameters, requestBody)
     
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "NewWindow", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Set NewWindow = responseBody("value")
-    Exit Function
-ErrorHandler:
-    Set NewWindow = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function SwitchToFrame(ByVal frame As WebElement) As Boolean
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -606,20 +424,10 @@ Public Function SwitchToFrame(ByVal frame As WebElement) As Boolean
     
     Set responseBody = SendCommand2Webdriver(W3C_SWITCH_TO_FRAME, urlParameters, requestBody)
     
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "SwitchToFrame", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     SwitchToFrame = True
-    Exit Function
-ErrorHandler:
-    SwitchToFrame = False
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function SwitchToParentFrame() As Boolean
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -628,15 +436,7 @@ Public Function SwitchToParentFrame() As Boolean
     
     Set responseBody = SendCommand2Webdriver(W3C_SWITCH_TO_PARENT_FRAME, urlParameters, requestBody)
     
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "SwitchToParentFrame", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     SwitchToParentFrame = True
-    Exit Function
-ErrorHandler:
-    SwitchToParentFrame = False
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function GetWindowRect() As Dictionary
@@ -654,8 +454,6 @@ Public Function SetWindowRect(Optional ByVal x As Integer, _
                               Optional ByVal y As Integer, _
                               Optional ByVal width As Integer, _
                               Optional ByVal height As Integer)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -669,15 +467,7 @@ Public Function SetWindowRect(Optional ByVal x As Integer, _
     
     Set responseBody = SendCommand2Webdriver(W3C_SET_WINDOW_RECT, urlParameters, requestBody)
     
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "SetWindowRect", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Set SetWindowRect = responseBody("value")
-    Exit Function
-ErrorHandler:
-    SetWindowRect = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 ' Return: JSON Object
@@ -686,8 +476,6 @@ End Function
 ' "width": the width of the outer dimensions of the top-level browsing context, including browser chrome etc...
 ' "height": the height of the outer dimensions of the top-level browsing context, including browser chrome etc...
 Public Function MaximizeWindow() As Dictionary
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -696,15 +484,7 @@ Public Function MaximizeWindow() As Dictionary
     
     Set responseBody = SendCommand2Webdriver(W3C_MAXIMIZE_WINDOW, urlParameters, requestBody)
     
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "MaximizeWindow", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Set MaximizeWindow = responseBody("value")
-    Exit Function
-ErrorHandler:
-    Set MaximizeWindow = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 ' Return: JSON Object
@@ -713,8 +493,6 @@ End Function
 ' "width": the width of the outer dimensions of the top-level browsing context, including browser chrome etc...
 ' "height": the height of the outer dimensions of the top-level browsing context, including browser chrome etc...
 Public Function MinimizeWindow()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -723,20 +501,10 @@ Public Function MinimizeWindow()
     
     Set responseBody = SendCommand2Webdriver(W3C_MINIMIZE_WINDOW, urlParameters, requestBody)
     
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "MinimizeWindow", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Set MinimizeWindow = responseBody("value")
-    Exit Function
-ErrorHandler:
-    Set MinimizeWindow = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function FullscreenWindow()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -744,22 +512,12 @@ Public Function FullscreenWindow()
     urlParameters.Add "{session id}", Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_FULLSCREEN_WINDOW, urlParameters, requestBody)
-    
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "FullscreenWindow", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
+        
     Set FullscreenWindow = responseBody("value")
-    Exit Function
-ErrorHandler:
-    Set FullscreenWindow = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function FindElement(ByVal by_strategy As By, _
                             ByVal target As String) As WebElement
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -769,21 +527,11 @@ Public Function FindElement(ByVal by_strategy As By, _
 
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENT, urlParameters, requestBody)
     
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "FindElement", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Set FindElement = Convert2WebElement(responseBody("value"))
-    Exit Function
-ErrorHandler:
-    Set FindElement = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function FindElements(ByVal by_strategy As By, _
                             ByVal target As String) As Variant
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -794,10 +542,6 @@ Public Function FindElements(ByVal by_strategy As By, _
     Set requestBody = SelectLocationStrategies(by_strategy, target)
     
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENTS, urlParameters, requestBody)
-    
-    If TypeName(responseBody("value")) <> "Collection" Then
-        Err.Raise vbObjectError + 513, "FindElements", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
     
     Dim counter As Integer
     Dim elementJson As Dictionary
@@ -811,17 +555,11 @@ Public Function FindElements(ByVal by_strategy As By, _
     Next
     
     FindElements = elements
-    Exit Function
-ErrorHandler:
-    Set FindElements = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function FindElementFromElement(ByVal element As WebElement, _
                                        ByVal by_strategy As By, _
                                        ByVal target As String) As WebElement
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -833,22 +571,12 @@ Public Function FindElementFromElement(ByVal element As WebElement, _
     
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENT_FROM_ELEMENT, urlParameters, requestBody)
     
-    If responseBody("value").Exists("error") Then
-        Err.Raise vbObjectError + 513, "FindElementFromElement", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Set FindElementFromElement = Convert2WebElement(responseBody("value"))
-    Exit Function
-ErrorHandler:
-    Set FindElementFromElement = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function FindElementsFromElement(ByVal element As WebElement, _
                                        ByVal by_strategy As By, _
                                        ByVal target As String) As Variant
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -862,10 +590,6 @@ Public Function FindElementsFromElement(ByVal element As WebElement, _
     
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENTS_FROM_ELEMENT, urlParameters, requestBody)
     
-    If TypeName(responseBody("value")) <> "Collection" Then
-        Err.Raise vbObjectError + 513, "FindElementsFromElement", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     Dim counter As Integer
     Dim elementJson As Dictionary
     ReDim elements(responseBody("value").Count - 1)
@@ -878,16 +602,10 @@ Public Function FindElementsFromElement(ByVal element As WebElement, _
     Next
     
     FindElementsFromElement = elements
-    Exit Function
-ErrorHandler:
-    Set FindElementsFromElement = Nothing
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function GetElementAttribute(ByVal element As WebElement, _
                                     ByVal name As String)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -898,20 +616,10 @@ Public Function GetElementAttribute(ByVal element As WebElement, _
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_ELEMENT_ATTRIBUTE, urlParameters, requestBody)
     
-    If TypeName(responseBody("value")) <> "String" Then
-        Err.Raise vbObjectError + 513, "GetElementAttribute", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     GetElementAttribute = responseBody("value")
-    Exit Function
-ErrorHandler:
-    GetElementAttribute = Null
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function GetElementText(ByVal element As WebElement) As String
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -920,87 +628,43 @@ Public Function GetElementText(ByVal element As WebElement) As String
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_ELEMENT_TEXT, urlParameters, requestBody)
-
-    If TypeName(responseBody("value")) <> "String" Then
-        Err.Raise vbObjectError + 513, "GetElementText", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
     
     GetElementText = responseBody("value")
-    Exit Function
-ErrorHandler:
-    GetElementText = Null
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Sub ElementClick(ByVal element As WebElement)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
 
     urlParameters.Add "{session id}", Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
 
-    Set responseBody = SendCommand2Webdriver(W3C_ELEMENT_CLICK, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "ElementClick", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_ELEMENT_CLICK, urlParameters, requestBody
 End Sub
 
 Public Sub ElementClear(ByVal element As WebElement)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
     
     urlParameters.Add "{session id}", Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
-    Set responseBody = SendCommand2Webdriver(W3C_ELEMENT_CLEAR, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "ElementClear", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_ELEMENT_CLEAR, urlParameters, requestBody
 End Sub
 
 Public Sub ElementSendKeys(text As String, ByVal element As WebElement)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
-        requestBody As New Dictionary, _
-        responseBody As Dictionary
+        requestBody As New Dictionary
     
     urlParameters.Add "{session id}", Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     requestBody.Add "text", text
-    ' requestBody.Add "value", Array("\ue007")
     
-    Set responseBody = SendCommand2Webdriver(W3C_ELEMENT_SEND_KEYS, urlParameters, requestBody)
-    
-    If IsNull(responseBody("value")) = False Then
-        Err.Raise vbObjectError + 513, "ElementSendKeys", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
+    SendCommand2Webdriver W3C_ELEMENT_SEND_KEYS, urlParameters, requestBody
 End Sub
 
 Public Function GetPageSource()
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -1009,20 +673,10 @@ Public Function GetPageSource()
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_PAGE_SOURCE, urlParameters, requestBody)
     
-    If TypeName(responseBody("value")) = "Dictionary" Then
-        Err.Raise vbObjectError + 513, "GetPageSource", JsonConverter.ConvertToJson(responseBody("value"))
-    End If
-    
     GetPageSource = responseBody("value")
-    Exit Function
-ErrorHandler:
-    GetPageSource = Null
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function ExecuteScript(ByVal script As String, ParamArray args() As Variant) As Variant
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -1034,22 +688,10 @@ Public Function ExecuteScript(ByVal script As String, ParamArray args() As Varia
     
     Set responseBody = SendCommand2Webdriver(W3C_EXECUTE_SCRIPT, urlParameters, requestBody)
     
-    If IsNull(responseBody("value")) = False Then
-        If TypeName(responseBody("value")) = "Dictionary" Then
-            Err.Raise vbObjectError + 513, "ExecuteScript", JsonConverter.ConvertToJson(responseBody("value"))
-        End If
-    End If
-    
     ExecuteScript = responseBody("value")
-    Exit Function
-ErrorHandler:
-    ExecuteScript = Empty
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As Variant) As Variant
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -1061,22 +703,10 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
     
     Set responseBody = SendCommand2Webdriver(W3C_EXECUTE_ASYNC_SCRIPT, urlParameters, requestBody)
     
-    If IsNull(responseBody("value")) = False Then
-        If TypeName(responseBody("value")) = "Dictionary" Then
-            Err.Raise vbObjectError + 513, "ExecuteAsyncScript", JsonConverter.ConvertToJson(responseBody("value"))
-        End If
-    End If
-    
     ExecuteAsyncScript = responseBody("value")
-    Exit Function
-ErrorHandler:
-    ExecuteAsyncScript = Empty
-    Log4Driver Err.Source, Err.Description
 End Function
 
 Public Sub TakeScreenshot(ByVal savePath As String)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -1085,20 +715,10 @@ Public Sub TakeScreenshot(ByVal savePath As String)
     
     Set responseBody = SendCommand2Webdriver(W3C_TAKE_SCREENSHOT, urlParameters, requestBody)
     
-    If TypeName(responseBody("value")) = "Dictionary" Then
-        Err.Raise vbObjectError + 513, "TakeScreenshot", responseBody("value")
-    End If
-    
     DecodeBase64ToFile responseBody("value"), savePath
-
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
 End Sub
 
 Public Sub TakeElementScreenshot(ByVal element As WebElement, ByVal savePath As String)
-    On Error GoTo ErrorHandler
-    
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
@@ -1110,21 +730,13 @@ Public Sub TakeElementScreenshot(ByVal element As WebElement, ByVal savePath As 
     
     Set responseBody = SendCommand2Webdriver(W3C_TAKE_ELEMENT_SCREENSHOT, urlParameters, requestBody)
 
-    If TypeName(responseBody("value")) = "Dictionary" Then
-        Err.Raise vbObjectError + 513, "TakeElementScreenshot", responseBody("value")
-    End If
-    
     DecodeBase64ToFile responseBody("value"), savePath
-
-    Exit Sub
-ErrorHandler:
-    Log4Driver Err.Source, Err.Description
 End Sub
 
 '------------------------------------------------------------------
 ' Communication Interface between 'Local end' & 'Remote end'
 '------------------------------------------------------------------
-Private Function SendCommand2Webdriver(driverCommand, _
+Private Function SendCommand2Webdriver(ByVal driverCommand As Variant, _
                 Optional urlParameters As Dictionary = Nothing, _
                 Optional requestBody As Dictionary = Nothing) As Dictionary
     Dim method As String: method = driverCommand(0)
@@ -1149,7 +761,12 @@ Private Function SendCommand2Webdriver(driverCommand, _
         DoEvents
     Loop
 
-    Set SendCommand2Webdriver = JsonConverter.ParseJson(xmlHttp.responseText)
+    If xmlHttp.Status = 200 Then
+        Set SendCommand2Webdriver = JsonConverter.ParseJson(xmlHttp.responseText)
+    Else
+        Log4Driver xmlHttp.responseText
+        Err.Raise vbObjectError + 513, "WebDriver", xmlHttp.responseText
+    End If
     
     Set xmlHttp = Nothing
 End Function
@@ -1213,14 +830,12 @@ Private Sub DecodeBase64ToFile(ByVal Base64String As String, ByVal savePath As S
     Close #FileNumber
 End Sub
 
-Private Sub Log4Driver(ByVal method As String, _
-                       ByVal errorMesssage As String)
+Private Sub Log4Driver(ByVal errorMesssage As String)
     Dim INT_FILE As Integer
     INT_FILE = FreeFile()
     
     Open ThisWorkbook.path + "./log4driver" & format(DateTime.Now, "yyyy-MM-dd") & ".txt" For Append As #INT_FILE
-    Print #INT_FILE, format(DateTime.Now, "yyyy-MM-dd hh:mm:ss") + _
-          " {" + method + "} " + errorMesssage
+    Print #INT_FILE, format(DateTime.Now, "yyyy-MM-dd hh:mm:ss") + errorMesssage
     
     Close #INT_FILE
 End Sub

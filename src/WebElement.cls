@@ -8,7 +8,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.1
+'------------------------------------------------------------------
+' SeleniumWrapperVBA v1.0.2
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
