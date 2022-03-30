@@ -45,7 +45,7 @@ The project implements the `endpoint node command` defined in [W3C WebDriver spe
 [`edgedriver`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
 [`iedriver`](https://www.selenium.dev/downloads/)
 2. Import `Options.cls`, `WebDriver.cls`, `WebElement.cls` and `JsonConverter.bas` into your Excel. (Open VBA Editor, `Alt + F11`; File > Import File) 
-   * where `JsonConverter.bas` could be found at [`here`](https://github.com/VBA-tools/VBA-JSON/blob/master/JsonConverter.bas)
+   * where `JsonConverter.bas`, a JSON Parser for VBA created and maintained by [@timhall](https://github.com/timhall). For more details, see [`here`](https://github.com/VBA-tools/VBA-JSON).
 3. Include a reference to "Microsoft Scripting Runtime". (Tools->References Check "`Microsoft Scripting Runtime`")
 
 #### Note
