@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.2
+' SeleniumWrapperVBA v1.0.3
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -196,7 +196,7 @@ Public Sub Edge(Optional ByVal driverPath As String = "msedgedriver.exe", _
     
     cmdLaunch = driverPath & " --port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(driverPath, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
 End Sub
 
 Public Sub Chrome(Optional ByVal driverPath As String = "chromedriver.exe", _
@@ -205,7 +205,7 @@ Public Sub Chrome(Optional ByVal driverPath As String = "chromedriver.exe", _
     
     cmdLaunch = driverPath & " --port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(driverPath, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
 End Sub
 
 Public Sub Firefox(Optional ByVal driverPath As String = "geckodriver.exe", _
@@ -214,7 +214,7 @@ Public Sub Firefox(Optional ByVal driverPath As String = "geckodriver.exe", _
     
     cmdLaunch = driverPath & " --port " & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(driverPath, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
 End Sub
 
 Public Sub InternetExplorer(Optional ByVal driverPath As String = "IEDriverServer.exe", _
@@ -223,7 +223,7 @@ Public Sub InternetExplorer(Optional ByVal driverPath As String = "IEDriverServe
     
     cmdLaunch = driverPath & " /port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(driverPath, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
 End Sub
 
 Public Sub Quit()
