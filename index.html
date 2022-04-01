@@ -5,10 +5,567 @@
   </head>
 
   <body>
-    <h1>My homepage!</h1>
-    
-    <h2>
-    </h2>
+<h1 id="seleniumwrappervba">SeleniumWrapperVBA</h1>
+<p>A standalone Selenium-WebDriver-based browser automation framework implemented for VBA.</p>
+<ul>
+<li><a href="https://github.com/er-ri/selenium-wrapper-vba/blob/main/README.JA.md">日本語</a></li>
+<li><a href="https://github.com/er-ri/selenium-wrapper-vba/blob/main/README.zh-CN.md">中文</a></li>
+</ul>
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li><a href="#usage">Usage</a></li>
+      <ul>
+        <li><a href="#element-retrieval">Element Retrieval</a></li>
+        <li><a href="#timeouts">Timeouts</a></li>
+        <li><a href="#working-with-iframe">Working with iframe</a></li>
+        <li><a href="#working-with-multiple-windows">Working with multiple windows</a></li>
+        <li><a href="#execute-javascript">Execute JavaScript</a></li>
+        <li><a href="#execute-async-javascript">Execute Async JavaScript</a></li>
+        <li><a href="#take-screenshot">Take Screenshot</a></li>
+        <li><a href="#take-element-screenshot">Take Element Screenshot</a></li>
+        <li><a href="#enable-edge-ie-mode">Enable Edge IE-mode</a></li>
+        <li><a href="#headless-mode">Headless mode</a></li>
+        <li><a href="#customize-user-agent">Customize User-Agent</a></li>
+      </ul>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contribution">Contribution</a></li>
+    <li><a href="#references">References</a></li>
+  </ol>
+</details>
 
-  </body>
+<h2 id="about-the-project">About The Project</h2>
+<p>The project implements the <code>endpoint node command</code> defined in <a href="https://www.w3.org/TR/webdriver/#endpoints">W3C WebDriver specification</a> through VBA. You can use the project to do browser automation without installing a programming language such as Python, Java, etc. However, excel and a browser-specific driver are required.</p>
+<h2 id="requirements">Requirements</h2>
+<ol>
+<li>Excel 32bit or 64bit</li>
+<li>Browser&#39;s driver(Supported Browsers: Firefox, Chrome, Edge and Internet Explorer)</li>
+</ol>
+<h2 id="getting-started">Getting Started</h2>
+<ol>
+<li>Download the browser-specific drivers, <a href="https://github.com/mozilla/geckodriver/releases"><code>geckodriver</code></a>,
+<a href="https://chromedriver.chromium.org/"><code>chromedriver</code></a>, 
+<a href="https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/"><code>edgedriver</code></a>, or
+<a href="https://www.selenium.dev/downloads/"><code>iedriver</code></a></li>
+<li>Import <code>Options.cls</code>, <code>WebDriver.cls</code>, <code>WebElement.cls</code> and <code>JsonConverter.bas</code> into your Excel. (Open VBA Editor, <code>Alt + F11</code>; File &gt; Import File) <ul>
+<li>where <code>JsonConverter.bas</code>, a JSON Parser for VBA created and maintained by <a href="https://github.com/timhall">@timhall</a>. For more details, see <a href="https://github.com/VBA-tools/VBA-JSON"><code>here</code></a>.</li>
+</ul>
+</li>
+<li>Include a reference to &quot;Microsoft Scripting Runtime&quot;. (Tools-&gt;References Check &quot;<code>Microsoft Scripting Runtime</code>&quot;)</li>
+</ol>
+<h4 id="note">Note</h4>
+<ul>
+<li>Set driver executable in the <code>PATH</code>, or you can also specify the path when launching the corresponding browser&#39;s driver.</li>
+<li>Error&#39;s message will be output at the same directory of the Excel workbook with the name of &quot;log4driver{YYYY-MM-DD}.txt&quot;, where {YYYY-MM-DD} is today&#39;s date.</li>
+<li>Some configurations is required before using <code>iedriver</code>, see <a href="https://www.selenium.dev/documentation/ie_driver_server/#required-configuration">here</a> for more details about the configurations. </li>
+</ul>
+<h4 id="example">Example</h4>
+<pre><code class="lang-vba">Sub Example()
+    Dim <span class="hljs-built_in">driver</span> As New WebDriver
+
+    <span class="hljs-built_in">driver</span>.Chrome
+    <span class="hljs-built_in">driver</span>.OpenBrowser
+    <span class="hljs-built_in">driver</span>.NavigateTo <span class="hljs-string">"https://www.google.com"</span>
+    <span class="hljs-built_in">driver</span>.FindElement(By.<span class="hljs-built_in">name</span>, <span class="hljs-string">"q"</span>).SendKeys <span class="hljs-string">"selenium wrapper vba"</span>
+    <span class="hljs-built_in">driver</span>.FindElement(By.XPath, <span class="hljs-string">"/html/body/div[1]/div[3]/form/div[1]/div[1]/div[2]/div[2]/div[5]/center/input[1]"</span>).Click
+    <span class="hljs-built_in">driver</span>.CloseBrowser
+
+    <span class="hljs-built_in">driver</span>.Quit
+    <span class="hljs-built_in">Set</span> <span class="hljs-built_in">driver</span> = Nothing
+End Sub
+</code></pre>
+<h2 id="usage">Usage</h2>
+<h3 id="element-retrieval">Element Retrieval</h3>
+<h4 id="find-element">Find Element</h4>
+<pre><code class="lang-vba">    <span class="hljs-comment">' Locator Strategies:</span>
+    <span class="hljs-keyword">Dim</span> e1, e2, e3, e4, e5, e6, e7 <span class="hljs-keyword">As</span> WebElement
+    <span class="hljs-keyword">set</span> e1 = driver.FindElement(<span class="hljs-keyword">By</span>.ID, <span class="hljs-string">"id"</span>)
+    <span class="hljs-keyword">set</span> e2 = driver.FindElement(<span class="hljs-keyword">By</span>.ClassName, <span class="hljs-string">"blue"</span>)
+    <span class="hljs-keyword">set</span> e3 = driver.FindElement(<span class="hljs-keyword">By</span>.Name, <span class="hljs-string">"name"</span>)
+    <span class="hljs-keyword">set</span> e4 = driver.FindElement(<span class="hljs-keyword">By</span>.LinkText, <span class="hljs-string">"www.google.com"</span>)
+    <span class="hljs-keyword">set</span> e5 = driver.FindElement(<span class="hljs-keyword">By</span>.PartialLinkText, <span class="hljs-string">"www.googl"</span>)
+    <span class="hljs-keyword">set</span> e6 = driver.FindElement(<span class="hljs-keyword">By</span>.TagName, <span class="hljs-string">"div"</span>)
+    <span class="hljs-keyword">set</span> e7 = driver.FindElement(<span class="hljs-keyword">By</span>.XPath, <span class="hljs-string">"/html/body/div[1]/div[3]"</span>)
+</code></pre>
+<h4 id="find-elements">Find Elements</h4>
+<pre><code class="lang-vba">    <span class="hljs-keyword">Dim</span> elements() As WebElement
+    elements = driver.FindElements(By.TagName, <span class="hljs-string">"a"</span>)
+
+    <span class="hljs-keyword">Dim</span> element As Variant
+    <span class="hljs-keyword">For</span> <span class="hljs-keyword">Each</span> element <span class="hljs-keyword">In</span> elements
+        <span class="hljs-comment">' Do your stuff</span>
+    <span class="hljs-keyword">Next</span> element
+</code></pre>
+<h4 id="find-element-frome-element">Find Element Frome Element</h4>
+<pre><code class="lang-vba">    <span class="hljs-keyword">Dim</span> elementRoot <span class="hljs-keyword">As</span> WebElement
+    <span class="hljs-keyword">Set</span> elementRoot = driver.FindElement(<span class="hljs-keyword">By</span>.ID, <span class="hljs-string">"root1"</span>)
+    <span class="hljs-keyword">Dim</span> elementChild <span class="hljs-keyword">As</span> WebElement
+    <span class="hljs-keyword">Set</span> elementChild = driver.FindElementFromElement(elmentRoot, <span class="hljs-keyword">By</span>.TagName, <span class="hljs-string">"div"</span>)
+</code></pre>
+<h4 id="find-elements-frome-element">Find Elements Frome Element</h4>
+<pre><code class="lang-vba">    <span class="hljs-keyword">Dim</span> elementRoot <span class="hljs-keyword">As</span> WebElement
+    <span class="hljs-keyword">Set</span> elementRoot = driver.FindElement(<span class="hljs-keyword">By</span>.ID, <span class="hljs-string">"root1"</span>)
+    <span class="hljs-keyword">Dim</span> elementChildren() <span class="hljs-keyword">As</span> WebElement
+    elementChildren() = driver.FindElementsFromElement(elmentRoot, <span class="hljs-keyword">By</span>.TagName, <span class="hljs-string">"p"</span>)
+</code></pre>
+<h3 id="timeouts">Timeouts</h3>
+<h4 id="get-timeouts">Get Timeouts</h4>
+<pre><code class="lang-vba">    Dim timeoutsDict As Dictionary
+    Set timeoutsDict = driver.GetTimeouts()
+    <span class="hljs-keyword">Debug</span>.<span class="hljs-keyword">Print</span> timeoutsDict(<span class="hljs-string">"script"</span>)    ' <span class="hljs-number">30000</span>
+    <span class="hljs-keyword">Debug</span>.<span class="hljs-keyword">Print</span> timeoutsDict(<span class="hljs-string">"pageLoad"</span>)  ' <span class="hljs-number">300000</span>
+    <span class="hljs-keyword">Debug</span>.<span class="hljs-keyword">Print</span> timeoutsDict(<span class="hljs-string">"implicit"</span>)  ' <span class="hljs-number">0</span>
+</code></pre>
+<h4 id="set-timeouts">Set Timeouts</h4>
+<pre><code class="lang-vba">    ' <span class="hljs-keyword">Set</span> <span class="hljs-string">"script"</span>:<span class="hljs-number">40000</span>,<span class="hljs-string">"pageLoad"</span>:<span class="hljs-number">500000</span>,<span class="hljs-string">"implicit"</span>:<span class="hljs-number">15000</span>
+    driver.SetTimeouts <span class="hljs-number">40000</span>, <span class="hljs-number">500000</span>, <span class="hljs-number">15000</span>
+</code></pre>
+<h3 id="working-with-iframe">Working with iframe</h3>
+<pre><code class="lang-vba">    <span class="hljs-built_in">Set</span> iframe1 = <span class="hljs-built_in">driver</span>.FindElement(By.ID, <span class="hljs-string">"iframe1"</span>)
+    <span class="hljs-built_in">driver</span>.SwitchToFrame iframe1
+    <span class="hljs-string">' Perform some operations...
+    driver.SwitchToParentFrame    '</span> <span class="hljs-keyword">switch</span> back
+</code></pre>
+<h3 id="working-with-multiple-windows">Working with multiple windows</h3>
+<pre><code class="lang-vba">    <span class="hljs-comment">' Get current windows's handle.</span>
+    <span class="hljs-keyword">Dim</span> hwnd <span class="hljs-keyword">As</span> <span class="hljs-built_in">String</span>
+    hwnd = driver.GetWindowHandle
+    <span class="hljs-comment">' Get the handles of all the windows.</span>
+    <span class="hljs-keyword">Dim</span> hWnds <span class="hljs-keyword">As</span> <span class="hljs-keyword">New</span> Collection
+    <span class="hljs-keyword">Set</span> hWnds = driver.GetWindowHandles
+    <span class="hljs-comment">' Switch to another window.</span>
+    driver.SwitchToWindow (driver.GetWindowHandles(<span class="hljs-number">2</span>))
+</code></pre>
+<h3 id="execute-javascript">Execute JavaScript</h3>
+<pre><code class="lang-vba">    ' <span class="hljs-keyword">No</span> parameters, <span class="hljs-keyword">no</span> <span class="hljs-keyword">return</span> value.
+    driver.ExecuteScript <span class="hljs-string">"alert('Hello world!');"</span>
+    ' Accept parameters, <span class="hljs-keyword">no</span> <span class="hljs-keyword">return</span> value.
+    driver.ExecuteScript <span class="hljs-string">"alert('Proof: ' + arguments[0] + arguments[1]);"</span>, <span class="hljs-string">"1+1="</span>, 2
+    ' Accept parameters, <span class="hljs-keyword">return</span> the result. 
+    Dim result <span class="hljs-keyword">As</span> Long
+    result = driver.ExecuteScript(<span class="hljs-string">"let result = arguments[0] + arguments[1];return result;"</span>, 1, 2)
+    Debug.<span class="hljs-keyword">Print</span> result  ' 3
+</code></pre>
+<h3 id="execute-async-javascript">Execute Async JavaScript</h3>
+<pre><code class="lang-vba">    ' <span class="hljs-keyword">No</span> parameters, <span class="hljs-keyword">no</span> <span class="hljs-keyword">return</span> value.
+    driver.ExecuteAsyncScript <span class="hljs-string">"alert('Hello world!');"</span>
+    ' Accept parameters, <span class="hljs-keyword">no</span> <span class="hljs-keyword">return</span> value.
+    driver.ExecuteAsyncScript <span class="hljs-string">"alert('Proof: ' + arguments[0] + arguments[1]);"</span>, <span class="hljs-string">"1+1="</span>, 2
+    ' Accept parameters, <span class="hljs-keyword">return</span> the result. 
+    Dim result <span class="hljs-keyword">As</span> Long
+    result = driver.ExecuteAsyncScript(<span class="hljs-string">"let result = arguments[0] + arguments[1];return result;"</span>, 1, 2)
+    Debug.<span class="hljs-keyword">Print</span> result  ' 3
+</code></pre>
+<h3 id="screenshot">Screenshot</h3>
+<h4 id="take-screenshot">Take Screenshot</h4>
+<pre><code class="lang-vba">    ' Take <span class="hljs-keyword">the</span> current webpage screenshot <span class="hljs-keyword">and</span> save <span class="hljs-keyword">it</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">the</span> specific path.
+    driver.TakeScreenshot ThisWorkbook.path + <span class="hljs-string">"./1.png"</span>
+</code></pre>
+<h4 id="take-element-screenshot">Take Element Screenshot</h4>
+<pre><code class="lang-vba">    <span class="hljs-comment">' Take the element screenshot directly.</span>
+    driver.FindElement(<span class="hljs-keyword">By</span>.ID, <span class="hljs-string">"selenium_logo"</span>).TakeScreenshot ThisWorkbook.path + <span class="hljs-string">"./logo.png"</span>
+    <span class="hljs-comment">' or</span>
+    <span class="hljs-keyword">Dim</span> seleniumLogo <span class="hljs-keyword">As</span> WebElement
+    <span class="hljs-keyword">Set</span> seleniumLogo = driver.FindElement(<span class="hljs-keyword">By</span>.ID, <span class="hljs-string">"selenium_logo"</span>)
+    seleniumLogo.TakeScreenshot ThisWorkbook.path + <span class="hljs-string">"./logo.png"</span>
+</code></pre>
+<h3 id="enable-edge-ie-mode">Enable Edge IE-mode</h3>
+<pre><code class="lang-vba">    <span class="hljs-keyword">Dim</span> driver <span class="hljs-keyword">As</span> <span class="hljs-keyword">New</span> WebDriver
+    <span class="hljs-keyword">Dim</span> ieOptions <span class="hljs-keyword">As</span> <span class="hljs-keyword">New</span> Options
+    ieOptions.BrowserType = InternetExplorer
+    ieOptions.IntroduceFlakinessByIgnoringSecurityDomains = <span class="hljs-literal">True</span>    <span class="hljs-comment">' Optional</span>
+    ieOptions.IgnoreZoomSetting = <span class="hljs-literal">True</span>  <span class="hljs-comment">' Optional</span>
+    ieOptions.AttachToEdgeChrome = <span class="hljs-literal">True</span>
+    ieOptions.EdgeExecutablePath = <span class="hljs-string">"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"</span>
+
+    driver.InternetExplorer <span class="hljs-string">"C:\WebDriver\IEDriverServer_Win32_4.0.0\IEDriverServer.exe"</span>
+    driver.OpenBrowser ieOptions
+</code></pre>
+<h3 id="headless-mode">Headless mode</h3>
+<h4 id="start-chrome-in-headless-mode">Start Chrome in headless mode</h4>
+<pre><code class="lang-vba">    Dim driver As New WebDriver
+    Dim chromeOptions As New Options
+    chromeOptions<span class="hljs-selector-class">.BrowserType</span> = Chrome
+    chromeOptions<span class="hljs-selector-class">.ChromeArguments</span><span class="hljs-selector-class">.add</span> <span class="hljs-string">"--headless"</span>
+
+    driver<span class="hljs-selector-class">.Chrome</span> <span class="hljs-string">"C:\WebDriver\chromedriver_win32\chromedriver.exe"</span>
+    driver<span class="hljs-selector-class">.OpenBrowser</span> chromeOptions
+</code></pre>
+<h4 id="start-firefox-in-headless-mode">Start Firefox in headless mode</h4>
+<pre><code class="lang-vba">    Dim driver As New WebDriver
+    Dim firefoxOptions As New Options
+    firefoxOptions<span class="hljs-selector-class">.BrowserType</span> = Firefox
+    firefoxOptions<span class="hljs-selector-class">.FirefoxArguments</span><span class="hljs-selector-class">.Add</span> <span class="hljs-string">"-headless"</span>
+
+    driver<span class="hljs-selector-class">.Firefox</span> <span class="hljs-string">"C:\WebDriver\Firefox\geckodriver.exe"</span>
+    driver<span class="hljs-selector-class">.OpenBrowser</span> firefoxOptions
+</code></pre>
+<h3 id="customize-user-agent">Customize User-Agent</h3>
+<h4 id="customize-user-agent-in-chrome">Customize User-Agent in Chrome</h4>
+<pre><code class="lang-vba">    Dim driver As New WebDriver
+    Dim chromeOptions As New Options
+
+    driver<span class="hljs-selector-class">.Chrome</span>
+    chromeOptions<span class="hljs-selector-class">.BrowserType</span> = Chrome
+    chromeOptions<span class="hljs-selector-class">.ChromeArguments</span><span class="hljs-selector-class">.Add</span> <span class="hljs-string">"--user-agent=my customized user-agent"</span>
+    driver<span class="hljs-selector-class">.OpenBrowser</span> chromeOptions
+    driver<span class="hljs-selector-class">.NavigateTo</span> <span class="hljs-string">"https://www.whatismybrowser.com/detect/what-is-my-user-agent/"</span>
+</code></pre>
+<h2 id="roadmap">Roadmap</h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint Node   Command</th>
+<th>Function Name</th>
+<th>Element Function Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New Session</td>
+<td>OpenBrowser</td>
+<td></td>
+</tr>
+<tr>
+<td>Delete Session</td>
+<td>CloseBrowser</td>
+<td></td>
+</tr>
+<tr>
+<td>Status</td>
+<td>GetStatus</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Timeouts</td>
+<td>GetTimeouts</td>
+<td></td>
+</tr>
+<tr>
+<td>Set Timeouts</td>
+<td>SetTimeouts</td>
+<td></td>
+</tr>
+<tr>
+<td>Navigate To</td>
+<td>NavigateTo</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Current URL</td>
+<td>GetCurrentURL</td>
+<td></td>
+</tr>
+<tr>
+<td>Back</td>
+<td>Back</td>
+<td></td>
+</tr>
+<tr>
+<td>Forward</td>
+<td>Forward</td>
+<td></td>
+</tr>
+<tr>
+<td>Refresh</td>
+<td>Refresh</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Title</td>
+<td>GetTitle</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Window Handle</td>
+<td>GetWindowHandle</td>
+<td></td>
+</tr>
+<tr>
+<td>Close Window</td>
+<td>CloseWindow</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch To Window</td>
+<td>SwitchToWindow</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Window Handles</td>
+<td>GetWindowHandles</td>
+<td></td>
+</tr>
+<tr>
+<td>New Window</td>
+<td>NewWindow</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch To Frame</td>
+<td>SwitchToFrame</td>
+<td></td>
+</tr>
+<tr>
+<td>Switch To Parent Frame</td>
+<td>SwitchToParentFrame</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Window Rect</td>
+<td>GetWindowRect</td>
+<td></td>
+</tr>
+<tr>
+<td>Set Window Rect</td>
+<td>SetWindowRect</td>
+<td></td>
+</tr>
+<tr>
+<td>Maximize Window</td>
+<td>MaximizeWindow</td>
+<td></td>
+</tr>
+<tr>
+<td>Minimize Window</td>
+<td>MinimizeWindow</td>
+<td></td>
+</tr>
+<tr>
+<td>Fullscreen Window</td>
+<td>FullscreenWindow</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Active Element</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Element Shadow Root</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Find Element</td>
+<td>FindElement</td>
+<td></td>
+</tr>
+<tr>
+<td>Find Elements</td>
+<td>FindElements</td>
+<td></td>
+</tr>
+<tr>
+<td>Find Element From Element</td>
+<td>FindElementFromElement</td>
+<td>FindElement</td>
+</tr>
+<tr>
+<td>Find Elements From Element</td>
+<td>FindElementsFromElement</td>
+<td>FindElements</td>
+</tr>
+<tr>
+<td>Find Element From Shadow Root</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Find Elements From Shadow Root</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Is Element Selected</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Element Attribute</td>
+<td>GetElementAttribute</td>
+<td>GetAttribute</td>
+</tr>
+<tr>
+<td>Get Element Property</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Element CSS Value</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Element Text</td>
+<td>GetElementText</td>
+<td>GetText</td>
+</tr>
+<tr>
+<td>Get Element Tag Name</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Element Rect</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Is Element Enabled</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Computed Role</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Computed Label</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Element Click</td>
+<td>ElementClick</td>
+<td>Click</td>
+</tr>
+<tr>
+<td>Element Clear</td>
+<td>ElementClear</td>
+<td>Clear</td>
+</tr>
+<tr>
+<td>Element Send Keys</td>
+<td>ElementSendKeys</td>
+<td>SendKeys</td>
+</tr>
+<tr>
+<td>Get Page Source</td>
+<td>GetPageSource</td>
+<td></td>
+</tr>
+<tr>
+<td>Execute Script</td>
+<td>ExecuteScript</td>
+<td></td>
+</tr>
+<tr>
+<td>Execute Async Script</td>
+<td>ExecuteAsyncScript</td>
+<td></td>
+</tr>
+<tr>
+<td>Get All Cookies</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Named Cookie</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Add Cookie</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Delete Cookie</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Delete All Cookies</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Perform Actions</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Release Actions</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Dismiss Alert</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Accept Alert</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Get Alert Text</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Send Alert Text</td>
+<td>Not yet</td>
+<td></td>
+</tr>
+<tr>
+<td>Take Screenshot</td>
+<td>TakeScreenshot</td>
+<td></td>
+</tr>
+<tr>
+<td>Take Element Screenshot</td>
+<td>TakeElementScreenshot</td>
+<td>TakeScreenshot</td>
+</tr>
+<tr>
+<td>Print Page</td>
+<td>Not yet</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Browser Capabilities are not listed above.</li>
+</ul>
+<h2 id="license">License</h2>
+<p>Distributed under the MIT License. See <code>LICENSE.txt</code> for more information.</p>
+<h2 id="contribution">Contribution</h2>
+<p>Any suggestions for improvement or contribution to this project are appreciated! Creating an issue or pull request!</p>
+<h2 id="references">References</h2>
+<ol>
+<li>W3C WebDriver Working Draft:<ul>
+<li><a href="https://www.w3.org/TR/webdriver/">https://www.w3.org/TR/webdriver/</a></li>
+</ul>
+</li>
+<li>The Selenium Browser Automation Project<ul>
+<li><a href="https://www.selenium.dev/documentation/webdriver/">https://www.selenium.dev/documentation/webdriver/</a></li>
+</ul>
+</li>
+<li>The W3C WebDriver Spec, A Simplified Guide:<ul>
+<li><a href="https://github.com/jlipps/simple-wd-spec">https://github.com/jlipps/simple-wd-spec</a></li>
+</ul>
+</li>
+<li>geckodriver, WebDriver Reference<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/WebDriver">https://developer.mozilla.org/en-US/docs/Web/WebDriver</a></li>
+</ul>
+</li>
+<li>Capabilities &amp; ChromeOptions<ul>
+<li><a href="https://chromedriver.chromium.org/capabilities">https://chromedriver.chromium.org/capabilities</a></li>
+</ul>
+</li>
+<li>Capabilities and EdgeOptions<ul>
+<li><a href="https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/capabilities-edge-options">https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/capabilities-edge-options</a></li>
+</ul>
+</li>
+</ol>
+      </body>
 </html>
+
