@@ -60,9 +60,12 @@ Sub Example()
 
     driver.Chrome
     driver.OpenBrowser
-    driver.NavigateTo "https://www.google.com"
-    driver.FindElement(By.name, "q").SendKeys "selenium wrapper vba"
-    driver.FindElement(By.XPath, "/html/body/div[1]/div[3]/form/div[1]/div[1]/div[2]/div[2]/div[5]/center/input[1]").Click
+    driver.NavigateTo "https://www.python.org/"
+    driver.MaximizeWindow
+    driver.FindElement(By.ID, "id-search-field").SendKeys "machine learning"
+    driver.FindElement(By.ID, "submit").Click
+    driver.TakeScreenshot ThisWorkbook.path + "./screenshot.png"
+    driver.MinimizeWindow
     driver.CloseBrowser
     
     driver.Quit
