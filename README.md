@@ -1,5 +1,5 @@
 # SeleniumWrapperVBA
-A standalone Selenium-WebDriver-based browser automation framework implemented for VBA.
+A Selenium-WebDriver-based browser automation framework implemented for VBA.
 
 *  [日本語](https://github.com/er-ri/selenium-wrapper-vba/blob/main/README.JA.md)
 *  [中文](https://github.com/er-ri/selenium-wrapper-vba/blob/main/README.zh-CN.md)
