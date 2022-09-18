@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.3
+' SeleniumWrapperVBA v1.0.4
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -40,6 +40,9 @@ Private m_ChromeArguments As Collection
 
 ' Options for Firefox
 Private m_FirefoxArguments As Collection
+
+' Options for Edge
+Private m_EdgeArguments As Collection
 
 '------------------------------------------------------------------
 ' Encapsulation
@@ -100,12 +103,20 @@ Public Property Let FirefoxArguments(ByVal new_FirefoxArguments As Collection)
     Set m_FirefoxArguments = new_FirefoxArguments
 End Property
 
+Public Property Get EdgeArguments() As Collection
+    Set EdgeArguments = m_EdgeArguments
+End Property
+
+Public Property Let EdgeArguments(ByVal new_EdgeArguments As Collection)
+    Set m_EdgeArguments = new_EdgeArguments
+End Property
 '------------------------------------------------------------------
 ' Constructor
 '------------------------------------------------------------------
 Private Sub Class_Initialize()
     Set m_ChromeArguments = New Collection
     Set m_FirefoxArguments = New Collection
+    Set m_EdgeArguments = New Collection
 End Sub
 
 '------------------------------------------------------------------
@@ -127,14 +138,14 @@ Public Function ConstructCapabilities() As Dictionary
         alwaysMatchRoot.Add "se:ieOptions", ieOptionsRoot
         capabilitiesRoot.Add "alwaysMatch", alwaysMatchRoot
     Case Me.BrowserType = Edge
-        'Dim edgeOptionsRoot As New Dictionary
+        Dim edgeOptionsRoot As New Dictionary
+        edgeOptionsRoot.Add "args", EdgeArguments
     
         alwaysMatchRoot.Add "browserName", "msedge"
-        'edgeOptionsRoot.add "ms:edgeOptions", edgeOptionsRoot
+        alwaysMatchRoot.Add "ms:edgeOptions", edgeOptionsRoot
         capabilitiesRoot.Add "alwaysMatch", alwaysMatchRoot
     Case Me.BrowserType = Chrome
         Dim chromeOptionsRoot As New Dictionary
-        'chromeOptionsRoot.Add "excludeSwitches", Array("enable-automation")
         chromeOptionsRoot.Add "args", ChromeArguments
         
         alwaysMatchRoot.Add "browserName", "chrome"
