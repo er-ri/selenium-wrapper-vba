@@ -49,7 +49,6 @@ The project implements the `endpoint node command` defined in [W3C WebDriver spe
 
 #### Note
 * Add browser's driver in the system `PATH`, or you can also specify the path when launching the corresponding browser's driver.
-* Error's message will be output at the same directory of the Excel workbook with the name of "log4driver{YYYY-MM-DD}.txt", where {YYYY-MM-DD} is current date.
 * Some configurations are required before using `iedriver`, see [here](https://www.selenium.dev/documentation/ie_driver_server/#required-configuration) for more details about the configurations. 
  
 #### Example
