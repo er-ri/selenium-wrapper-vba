@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.4
+' SeleniumWrapperVBA v1.0.5
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -93,7 +93,7 @@ End Enum
 
 Private m_RemoteEndUrl As String
 Private m_PID As String
-Private m_Capabilities As Dictionary
+Private m_MyOptions As WebDriverOptions
 
 '------------------------------------------------------------------
 ' Encapsulation
@@ -114,14 +114,13 @@ Public Property Let PID(ByVal new_PID As String)
     m_PID = new_PID
 End Property
 
-Public Property Let Capabilities(ByVal new_Capabilities As Dictionary)
-    Set m_Capabilities = new_Capabilities
+Public Property Get MyOptions() As WebDriverOptions
+    Set MyOptions = m_MyOptions
 End Property
 
-Public Property Get Capabilities() As Dictionary
-    Set Capabilities = m_Capabilities
+Public Property Let MyOptions(ByVal new_MyOptions As WebDriverOptions)
+    Set m_MyOptions = new_MyOptions
 End Property
-
 '------------------------------------------------------------------
 ' Constructor
 '------------------------------------------------------------------
@@ -184,49 +183,55 @@ Private Sub Class_Initialize()
     W3C_GET_ALERT_TEXT = Array("GET", "/session/{session id}/alert/text")
     W3C_TAKE_SCREENSHOT = Array("GET", "/session/{session id}/screenshot")
     W3C_TAKE_ELEMENT_SCREENSHOT = Array("GET", "/session/{session id}/element/{element id}/screenshot")
+    
+    MyOptions = New WebDriverOptions
 End Sub
 
 '------------------------------------------------------------------
 ' Browser Implementation
 '------------------------------------------------------------------
 Public Sub Edge(Optional ByVal driverPath As String = "msedgedriver.exe", _
-                Optional ByVal port As Integer = 9516)
+                Optional ByVal port As Integer = 9516, _
+                Optional ByVal winStyle As VbAppWinStyle = vbMinimizedNoFocus)
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " --port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, winStyle)
 End Sub
 
 Public Sub Chrome(Optional ByVal driverPath As String = "chromedriver.exe", _
-                  Optional ByVal port As Integer = 9515)
+                  Optional ByVal port As Integer = 9515, _
+                  Optional ByVal winStyle As VbAppWinStyle = vbMinimizedNoFocus)
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " --port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, winStyle)
 End Sub
 
 Public Sub Firefox(Optional ByVal driverPath As String = "geckodriver.exe", _
-                   Optional ByVal port As Integer = 4444)
+                   Optional ByVal port As Integer = 4444, _
+                   Optional ByVal winStyle As VbAppWinStyle = vbMinimizedNoFocus)
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " --port " & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, winStyle)
 End Sub
 
 Public Sub InternetExplorer(Optional ByVal driverPath As String = "IEDriverServer.exe", _
-                            Optional ByVal port = 5555)
+                            Optional ByVal port = 5555, _
+                            Optional ByVal winStyle As VbAppWinStyle = vbMinimizedNoFocus)
     Dim cmdLaunch As String
     
     cmdLaunch = driverPath & " /port=" & CStr(port)
     RemoteEndUrl = "http://localhost:" & CStr(port)
-    PID = Shell(cmdLaunch, vbMinimizedNoFocus)
+    PID = Shell(cmdLaunch, winStyle)
 End Sub
 
 Public Sub Quit()
-    Shell "taskkill /pid " & PID
+    Shell "taskkill /T /F /pid " & PID
 End Sub
 
 '------------------------------------------------------------------
@@ -234,26 +239,26 @@ End Sub
 ' https://www.w3.org/TR/webdriver/
 '------------------------------------------------------------------
 ' Optimize for similar commands?
-Public Sub OpenBrowser(Optional ByVal browserOptions As Options = Nothing)
+Public Sub OpenBrowser(Optional ByVal userOptions As WebDriverOptions = Nothing)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    If browserOptions Is Nothing Then
-        requestBody.Add "capabilities", New Dictionary
-    Else
-        requestBody.Add "capabilities", browserOptions.ConstructCapabilities()
+    If Not userOptions Is Nothing Then
+        MyOptions = userOptions
     End If
+    
+    requestBody.Add "capabilities", MyOptions.ConstructCapabilities()
     
     Set responseBody = SendCommand2Webdriver(W3C_NEW_SESSION, urlParameters, requestBody)
 
-    Capabilities = responseBody("value")
+    MyOptions.Capabilities = responseBody("value")
 End Sub
 
 Public Sub CloseBrowser()
     Dim urlParameters As New Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     SendCommand2Webdriver W3C_DELETE_SESSION, urlParameters
 End Sub
@@ -273,7 +278,7 @@ Public Function GetTimeouts()
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_TIMEOUTS, urlParameters, requestBody)
 
@@ -286,7 +291,7 @@ Public Sub SetTimeouts(Optional ByVal script As Long = 30000, _
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     requestBody.Add "script", script
     requestBody.Add "pageLoad", pageLoad
     requestBody.Add "implicit", implicit    ' a time to wait in milliseconds for the element location strategy
@@ -298,7 +303,7 @@ Public Sub NavigateTo(ByVal url As String)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     requestBody.Add "url", url
     
     SendCommand2Webdriver W3C_GO, urlParameters, requestBody
@@ -309,7 +314,7 @@ Public Function GetCurrentURL() As String
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_CURRENT_URL, urlParameters, requestBody)
     
@@ -320,7 +325,7 @@ Public Sub Back()
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     SendCommand2Webdriver W3C_BACK, urlParameters, requestBody
 End Sub
@@ -329,7 +334,7 @@ Public Sub Forward()
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     SendCommand2Webdriver W3C_FORWARD, urlParameters, requestBody
 End Sub
@@ -338,7 +343,7 @@ Public Sub Refresh()
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     SendCommand2Webdriver W3C_REFRESH, urlParameters, requestBody
 End Sub
@@ -348,7 +353,7 @@ Public Function GetTitle() As String
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_TITLE, urlParameters, requestBody)
     
@@ -360,7 +365,7 @@ Public Function GetWindowHandle()
         requestBody As New Dictionary, _
         responseBody As Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_WINDOW_HANDLE, urlParameters, requestBody)
     
@@ -371,7 +376,7 @@ Public Sub CloseWindow()
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     SendCommand2Webdriver W3C_CLOSE_WINDOW, urlParameters, requestBody
 End Sub
@@ -380,7 +385,7 @@ Public Sub SwitchToWindow(ByVal handle As String)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     requestBody.Add "handle", handle
 
     SendCommand2Webdriver W3C_SWITCH_TO_WINDOW, urlParameters, requestBody
@@ -391,7 +396,7 @@ Public Function GetWindowHandles()
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
             
     Set responseBody = SendCommand2Webdriver(W3C_GET_WINDOW_HANDLES, urlParameters, requestBody)
     
@@ -406,7 +411,7 @@ Public Function NewWindow() As Dictionary
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_NEW_WINDOW, urlParameters, requestBody)
     
@@ -418,7 +423,7 @@ Public Function SwitchToFrame(ByVal frame As WebElement) As Boolean
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", frame.driver.Capabilities("sessionId")
+    urlParameters.Add "{session id}", frame.driver.MyOptions.Capabilities("sessionId")
     requestBody.Add "id", frame.elementJson
     
     Set responseBody = SendCommand2Webdriver(W3C_SWITCH_TO_FRAME, urlParameters, requestBody)
@@ -431,7 +436,7 @@ Public Function SwitchToParentFrame() As Boolean
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_SWITCH_TO_PARENT_FRAME, urlParameters, requestBody)
     
@@ -443,7 +448,7 @@ Public Function GetWindowRect() As Dictionary
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     Set responseBody = SendCommand2Webdriver(W3C_GET_WINDOW_RECT, urlParameters, requestBody)
     
     Set GetWindowRect = responseBody("value")
@@ -457,7 +462,7 @@ Public Function SetWindowRect(Optional ByVal x As Integer, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     If x <> 0 Then requestBody.Add "x", x
     If y <> 0 Then requestBody.Add "y", y
@@ -479,7 +484,7 @@ Public Function MaximizeWindow() As Dictionary
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_MAXIMIZE_WINDOW, urlParameters, requestBody)
     
@@ -496,7 +501,7 @@ Public Function MinimizeWindow()
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_MINIMIZE_WINDOW, urlParameters, requestBody)
     
@@ -508,7 +513,7 @@ Public Function FullscreenWindow()
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_FULLSCREEN_WINDOW, urlParameters, requestBody)
         
@@ -521,7 +526,7 @@ Public Function FindElement(ByVal by_strategy As By, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     Set requestBody = SelectLocationStrategies(by_strategy, target)
 
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENT, urlParameters, requestBody)
@@ -537,7 +542,7 @@ Public Function FindElements(ByVal by_strategy As By, _
     
     Dim elements() As WebElement
        
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     Set requestBody = SelectLocationStrategies(by_strategy, target)
     
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENTS, urlParameters, requestBody)
@@ -563,7 +568,7 @@ Public Function FindElementFromElement(ByVal element As WebElement, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     Set requestBody = SelectLocationStrategies(by_strategy, target)
@@ -582,7 +587,7 @@ Public Function FindElementsFromElement(ByVal element As WebElement, _
     
     Dim elements() As WebElement
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     Set requestBody = SelectLocationStrategies(by_strategy, target)
@@ -609,7 +614,7 @@ Public Function GetElementAttribute(ByVal element As WebElement, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
         
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     urlParameters.Add "{name}", name
     
@@ -623,7 +628,7 @@ Public Function GetElementText(ByVal element As WebElement) As String
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_ELEMENT_TEXT, urlParameters, requestBody)
@@ -635,7 +640,7 @@ Public Sub ElementClick(ByVal element As WebElement)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
 
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
 
     SendCommand2Webdriver W3C_ELEMENT_CLICK, urlParameters, requestBody
@@ -645,7 +650,7 @@ Public Sub ElementClear(ByVal element As WebElement)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     SendCommand2Webdriver W3C_ELEMENT_CLEAR, urlParameters, requestBody
@@ -655,7 +660,7 @@ Public Sub ElementSendKeys(text As String, ByVal element As WebElement)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     requestBody.Add "text", text
@@ -668,7 +673,7 @@ Public Function GetPageSource()
         requestBody As New Dictionary, _
         responseBody As Dictionary
 
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_GET_PAGE_SOURCE, urlParameters, requestBody)
     
@@ -680,7 +685,7 @@ Public Function ExecuteScript(ByVal script As String, ParamArray args() As Varia
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     requestBody.Add "script", script
     requestBody.Add "args", args
@@ -695,7 +700,7 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     requestBody.Add "script", script
     requestBody.Add "args", args
@@ -710,7 +715,7 @@ Public Sub TakeScreenshot(ByVal savePath As String)
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     Set responseBody = SendCommand2Webdriver(W3C_TAKE_SCREENSHOT, urlParameters, requestBody)
     
@@ -722,7 +727,7 @@ Public Sub TakeElementScreenshot(ByVal element As WebElement, ByVal savePath As 
         requestBody As New Dictionary, _
         responseBody As Dictionary
     
-    urlParameters.Add "{session id}", Capabilities("sessionId")
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
     
     requestBody.Add "scroll", True
@@ -760,10 +765,13 @@ Private Function SendCommand2Webdriver(ByVal driverCommand As Variant, _
         DoEvents
     Loop
 
+    If MyOptions.LogFile <> vbNullString Then
+        Log4Driver MyOptions.LogFile, xmlHttp.responseText
+    End If
+    
     If xmlHttp.Status = 200 Then
         Set SendCommand2Webdriver = JsonConverter.ParseJson(xmlHttp.responseText)
     Else
-        Log4Driver xmlHttp.responseText
         Err.Raise vbObjectError + 513, "WebDriver", xmlHttp.responseText
     End If
     
@@ -829,12 +837,12 @@ Private Sub DecodeBase64ToFile(ByVal Base64String As String, ByVal savePath As S
     Close #FileNumber
 End Sub
 
-Private Sub Log4Driver(ByVal errorMesssage As String)
+Private Sub Log4Driver(ByVal LogFile As String, ByVal messsage As String)
     Dim INT_FILE As Integer
     INT_FILE = FreeFile()
     
-    Open ThisWorkbook.path + "./log4driver" & format(DateTime.Now, "yyyy-MM-dd") & ".txt" For Append As #INT_FILE
-    Print #INT_FILE, format(DateTime.Now, "yyyy-MM-dd hh:mm:ss") + errorMesssage
+    Open LogFile For Append As #INT_FILE
+    Print #INT_FILE, format(DateTime.Now, "yyyy-MM-dd hh:mm:ss") + messsage
     
     Close #INT_FILE
 End Sub

@@ -43,7 +43,7 @@ The project implements the `endpoint node command` defined in [W3C WebDriver spe
 [`chromedriver`](https://chromedriver.chromium.org/), 
 [`edgedriver`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
 [`iedriver`](https://www.selenium.dev/downloads/)
-2. Import `Options.cls`, `WebDriver.cls`, `WebElement.cls` and `JsonConverter.bas` into your Excel. (Open VBA Editor, `Alt + F11`; File > Import File) 
+2. Import `WebDriverOptions.cls`, `WebDriver.cls`, `WebElement.cls` and `JsonConverter.bas` into your Excel. (Open VBA Editor, `Alt + F11`; File > Import File) 
    * where `JsonConverter.bas`, a JSON Parser for VBA created and maintained by [@timhall](https://github.com/timhall). For more details, see [`here`](https://github.com/VBA-tools/VBA-JSON).
 3. Include a reference to "Microsoft Scripting Runtime". (Tools->References Check "`Microsoft Scripting Runtime`")
 
@@ -194,7 +194,7 @@ End Sub
 ### Enable Edge IE-mode
 ```vba
     Dim driver As New WebDriver
-    Dim ieOptions As New Options
+    Dim ieOptions As New WebDriverOptions
     ieOptions.BrowserType = InternetExplorer
     ieOptions.IntroduceFlakinessByIgnoringSecurityDomains = True    ' Optional
     ieOptions.IgnoreZoomSetting = True  ' Optional
@@ -209,7 +209,7 @@ End Sub
 #### Start Chrome in headless mode
 ```vba
     Dim driver As New WebDriver
-    Dim chromeOptions As New Options
+    Dim chromeOptions As New WebDriverOptions
     chromeOptions.BrowserType = Chrome
     chromeOptions.ChromeArguments.add "--headless"
 
@@ -220,7 +220,7 @@ End Sub
 #### Start Firefox in headless mode
 ```vba
     Dim driver As New WebDriver
-    Dim firefoxOptions As New Options
+    Dim firefoxOptions As New WebDriverOptions
     firefoxOptions.BrowserType = Firefox
     firefoxOptions.FirefoxArguments.Add "-headless"
 
@@ -232,7 +232,7 @@ End Sub
 #### Customize User-Agent in Chrome
 ```vba
     Dim driver As New WebDriver
-    Dim chromeOptions As New Options
+    Dim chromeOptions As New WebDriverOptions
     
     driver.Chrome
     chromeOptions.BrowserType = Chrome
