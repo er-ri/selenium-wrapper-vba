@@ -76,7 +76,7 @@ End Sub
 #### Find Element
 ```vba
     ' Locator Strategies:
-    Dim e1, e2, e3, e4, e5, e6, e7 As WebElement
+    Dim e1, e2, e3, e4, e5, e6, e7, e8 As WebElement
     set e1 = driver.FindElement(By.ID, "id")
     set e2 = driver.FindElement(By.ClassName, "blue")
     set e3 = driver.FindElement(By.Name, "name")
@@ -84,6 +84,7 @@ End Sub
     set e5 = driver.FindElement(By.PartialLinkText, "www.googl")
     set e6 = driver.FindElement(By.TagName, "div")
     set e7 = driver.FindElement(By.XPath, "/html/body/div[1]/div[3]")
+    set e8 = driver.FindElement(By.CSS, ".search input[type='text']")
 ```
 
 #### Find Elements
@@ -97,7 +98,7 @@ End Sub
     Next element
 ```
 
-#### Find Element Frome Element
+#### Find Element From Element
 ```vba
     Dim elementRoot As WebElement
     Set elementRoot = driver.FindElement(By.ID, "root1")
@@ -105,7 +106,7 @@ End Sub
     Set elementChild = driver.FindElementFromElement(elmentRoot, By.TagName, "div")
 ```
 
-#### Find Elements Frome Element
+#### Find Elements From Element
 ```vba
     Dim elementRoot As WebElement
     Set elementRoot = driver.FindElement(By.ID, "root1")
@@ -153,8 +154,10 @@ End Sub
 ```vba
     ' No parameters, no return value.
     driver.ExecuteScript "alert('Hello world!');"
+    driver.DismissAlert
     ' Accept parameters, no return value.
     driver.ExecuteScript "alert('Proof: ' + arguments[0] + arguments[1]);", "1+1=", 2
+    driver.DismissAlert
     ' Accept parameters, return the result. 
     Dim result As Long
     result = driver.ExecuteScript("let result = arguments[0] + arguments[1];return result;", 1, 2)
@@ -165,12 +168,26 @@ End Sub
 ```vba
     ' No parameters, no return value.
     driver.ExecuteAsyncScript "alert('Hello world!');"
+    driver.WaitUntilAlertIsPresent
+    driver.DismissAlert
     ' Accept parameters, no return value.
     driver.ExecuteAsyncScript "alert('Proof: ' + arguments[0] + arguments[1]);", "1+1=", 2
+    driver.WaitUntilAlertIsPresent
+    driver.DismissAlert
     ' Accept parameters, return the result. 
     Dim result As Long
     result = driver.ExecuteAsyncScript("let result = arguments[0] + arguments[1];return result;", 1, 2)
     Debug.Print result  ' 3
+```
+
+### Working with alerts
+```vba
+    driver.WaitUntilAlertIsPresent
+    driver.DismissAlert
+
+    driver.ExecuteScript "prompt('question?')"
+    driver.SendAlertText "answer"
+    driver.AcceptAlert
 ```
 
 ### Screenshot
@@ -276,7 +293,7 @@ End Sub
 | Find Elements From Shadow Root | Not yet                 |                       |
 | Is Element Selected            | Not yet                 |                       |
 | Get Element Attribute          | GetElementAttribute     | GetAttribute          |
-| Get Element Property           | Not yet                 |                       |
+| Get Element Property           | GetElementProperty      | GetProperty           |
 | Get Element CSS Value          | Not yet                 |                       |
 | Get Element Text               | GetElementText          | GetText               |
 | Get Element Tag Name           | Not yet                 |                       |
@@ -297,10 +314,10 @@ End Sub
 | Delete All Cookies             | Not yet                 |                       |
 | Perform Actions                | Not yet                 |                       |
 | Release Actions                | Not yet                 |                       |
-| Dismiss Alert                  | Not yet                 |                       |
-| Accept Alert                   | Not yet                 |                       |
-| Get Alert Text                 | Not yet                 |                       |
-| Send Alert Text                | Not yet                 |                       |
+| Dismiss Alert                  | DismissAlert            |                       |
+| Accept Alert                   | AcceptAlert             |                       |
+| Get Alert Text                 | GetAlertText            |                       |
+| Send Alert Text                | SendAlertText           |                       |
 | Take Screenshot                | TakeScreenshot          |                       |
 | Take Element Screenshot        | TakeElementScreenshot   | TakeScreenshot        |
 | Print Page                     | Not yet                 |                       |
