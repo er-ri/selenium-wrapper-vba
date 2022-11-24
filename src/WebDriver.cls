@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.5
+' SeleniumWrapperVBA v1.0.6
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -89,6 +89,7 @@ Public Enum By
     PartialLinkText = 5
     TagName = 6
     XPath = 7
+    CSS = 8
 End Enum
 
 Private m_RemoteEndUrl As String
@@ -623,6 +624,21 @@ Public Function GetElementAttribute(ByVal element As WebElement, _
     GetElementAttribute = responseBody("value")
 End Function
 
+Public Function GetElementProperty(ByVal element As WebElement, _
+                                    ByVal name As String)
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary, _
+        responseBody As Dictionary
+        
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
+    urlParameters.Add "{name}", name
+    
+    Set responseBody = SendCommand2Webdriver(W3C_GET_ELEMENT_PROPERTY, urlParameters, requestBody)
+    
+    GetElementProperty = responseBody("value")
+End Function
+
 Public Function GetElementText(ByVal element As WebElement) As String
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
@@ -687,6 +703,16 @@ Public Function ExecuteScript(ByVal script As String, ParamArray args() As Varia
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
+    'Change any WebElement objects passed in to instead be their elementJson
+    Dim vArg As Variant
+    Dim i As Integer
+    For i = 0 To UBound(args)
+        Set vArg = args(i)
+        If TypeOf vArg Is WebElement Then
+            Set args(i) = vArg.elementJson
+        End If
+    Next i
+    
     requestBody.Add "script", script
     requestBody.Add "args", args
     
@@ -702,6 +728,16 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
+    'Change any WebElement objects passed in to instead be their elementJson
+    Dim vArg As Variant
+    Dim i As Integer
+    For i = 0 To UBound(args)
+        Set vArg = args(i)
+        If TypeOf vArg Is WebElement Then
+            Set args(i) = vArg.elementJson
+        End If
+    Next i
+    
     requestBody.Add "script", script
     requestBody.Add "args", args
     
@@ -709,6 +745,63 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
     
     ExecuteAsyncScript = responseBody("value")
 End Function
+
+Public Function AlertIsPresent() As Boolean
+    Dim alertText As String: alertText = "__NONE__"
+    On Error Resume Next
+    alertText = GetAlertText
+    On Error GoTo 0
+    AlertIsPresent = alertText <> "__NONE__"
+End Function
+
+Public Sub WaitUntilAlertIsPresent(Optional ByVal timeout As Date = #12:00:30 AM#)
+    Dim abortTime As Date
+    abortTime = Now + timeout
+    Do While Not AlertIsPresent And Now < abortTime
+        DoEvents
+    Loop
+End Sub
+
+Public Sub DismissAlert()
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary
+
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    
+    SendCommand2Webdriver W3C_DISMISS_ALERT, urlParameters, requestBody
+End Sub
+
+Public Sub AcceptAlert()
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary
+
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    
+    SendCommand2Webdriver W3C_ACCEPT_ALERT, urlParameters, requestBody
+End Sub
+
+Public Function GetAlertText()
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary, _
+        responseBody As Dictionary
+
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    
+    Set responseBody = SendCommand2Webdriver(W3C_GET_ALERT_TEXT, urlParameters, requestBody)
+    
+    GetAlertText = responseBody("value")
+End Function
+
+Public Sub SendAlertText(text As String)
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary
+    
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    
+    requestBody.Add "text", text
+    
+    SendCommand2Webdriver W3C_SEND_ALERT_TEXT, urlParameters, requestBody
+End Sub
 
 Public Sub TakeScreenshot(ByVal savePath As String)
     Dim urlParameters As New Dictionary, _
@@ -801,7 +894,7 @@ Private Function SelectLocationStrategies(ByVal Strategy As By, ByVal value As S
             searchJson.Add "using", "link text"
         Case Strategy = By.PartialLinkText
             searchJson.Add "using", "partial link text"
-        Case Strategy = By.TagName
+        Case Strategy = By.TagName, Strategy = By.CSS
             searchJson.Add "using", "css selector"
             searchJson.Add "value", value
         Case Strategy = By.XPath

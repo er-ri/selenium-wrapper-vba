@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.5
+' SeleniumWrapperVBA v1.0.6
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -70,6 +70,10 @@ End Sub
 
 Public Function GetAttribute(ByVal name As String)
     GetAttribute = driver.GetElementAttribute(Me, name)
+End Function
+
+Public Function GetProperty(ByVal name As String)
+    GetProperty = driver.GetElementProperty(Me, name)
 End Function
 
 Public Function GetText()
