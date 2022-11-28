@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.6
+' SeleniumWrapperVBA v1.0.7
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -542,11 +542,13 @@ Public Function FindElements(ByVal by_strategy As By, _
         responseBody As Dictionary
     
     Dim elements() As WebElement
+    FindElements = elements
        
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     Set requestBody = SelectLocationStrategies(by_strategy, target)
     
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENTS, urlParameters, requestBody)
+    If responseBody("value").Count = 0 Then Exit Function
     
     Dim counter As Integer
     Dim elementJson As Dictionary
@@ -587,6 +589,7 @@ Public Function FindElementsFromElement(ByVal element As WebElement, _
         responseBody As Dictionary
     
     Dim elements() As WebElement
+    FindElementsFromElement = elements
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
@@ -594,6 +597,7 @@ Public Function FindElementsFromElement(ByVal element As WebElement, _
     Set requestBody = SelectLocationStrategies(by_strategy, target)
     
     Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENTS_FROM_ELEMENT, urlParameters, requestBody)
+    If responseBody("value").Count = 0 Then Exit Function
     
     Dim counter As Integer
     Dim elementJson As Dictionary
@@ -700,21 +704,20 @@ Public Function ExecuteScript(ByVal script As String, ParamArray args() As Varia
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
+    Dim args2() as Variant
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     'Change any WebElement objects passed in to instead be their elementJson
-    Dim vArg As Variant
+    ReDim args2(Ubound(args))
     Dim i As Integer
     For i = 0 To UBound(args)
-        Set vArg = args(i)
-        If TypeOf vArg Is WebElement Then
-            Set args(i) = vArg.elementJson
-        End If
+        Set args2(i) = args(i)
+        If TypeOf args(i) Is WebElement Then Set args2(i) = args(i).elementJson
     Next i
     
     requestBody.Add "script", script
-    requestBody.Add "args", args
+    requestBody.Add "args", args2
     
     Set responseBody = SendCommand2Webdriver(W3C_EXECUTE_SCRIPT, urlParameters, requestBody)
     
@@ -725,21 +728,20 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
+    Dim args2() As Variant
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
     'Change any WebElement objects passed in to instead be their elementJson
-    Dim vArg As Variant
+    ReDim args2(UBound(args))
     Dim i As Integer
     For i = 0 To UBound(args)
-        Set vArg = args(i)
-        If TypeOf vArg Is WebElement Then
-            Set args(i) = vArg.elementJson
-        End If
+        Set args2(i) = args(i)
+        If TypeOf args(i) Is WebElement Then Set args2(i) = args(i).elementJson
     Next i
     
     requestBody.Add "script", script
-    requestBody.Add "args", args
+    requestBody.Add "args", args2
     
     Set responseBody = SendCommand2Webdriver(W3C_EXECUTE_ASYNC_SCRIPT, urlParameters, requestBody)
     
