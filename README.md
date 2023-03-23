@@ -35,7 +35,7 @@ A Selenium-WebDriver-based browser automation framework implemented for VBA.
 The project implements the `endpoint node command` defined in [W3C WebDriver specification](https://www.w3.org/TR/webdriver/#endpoints) through VBA. You can use the project to do browser automation without installing a programming language such as Python, Java, etc. However, excel and a browser-specific driver are required.
 
 ## Requirements
-1. Excel 32bit or 64bit
+1. MS Office(Excel, Word, PowerPoint, etc) 32bit or 64bit
 2. Browser's driver(Supported Browsers: Firefox, Chrome, Edge and Internet Explorer)
 
 ##  Getting Started
@@ -303,7 +303,7 @@ End Sub
 | Get Computed Label             | Not yet                 |                       |
 | Element Click                  | ElementClick            | Click                 |
 | Element Clear                  | ElementClear            | Clear                 |
-| Element Send Keys              | ElementSendKeys         | SendKeys              |
+| Element Send Keys              | *ElementSendKeys*       | *SendKeys*            |
 | Get Page Source                | GetPageSource           |                       |
 | Execute Script                 | ExecuteScript           |                       |
 | Execute Async Script           | ExecuteAsyncScript      |                       |
@@ -322,6 +322,7 @@ End Sub
 | Take Element Screenshot        | TakeElementScreenshot   | TakeScreenshot        |
 | Print Page                     | Not yet                 |                       |
 * Browser Capabilities are not listed above.
+* Key action(Such as `Enter`, `Shift`, `Control`) has not been implemented.
 
 ## License
 Distributed under the MIT License. See `LICENSE.txt` for more information.

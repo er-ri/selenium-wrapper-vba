@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.7
+' SeleniumWrapperVBA v1.0.8
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -239,7 +239,6 @@ End Sub
 ' W3C Standard Endpoints
 ' https://www.w3.org/TR/webdriver/
 '------------------------------------------------------------------
-' Optimize for similar commands?
 Public Sub OpenBrowser(Optional ByVal userOptions As WebDriverOptions = Nothing)
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
@@ -700,24 +699,37 @@ Public Function GetPageSource()
     GetPageSource = responseBody("value")
 End Function
 
+'Change any WebElement objects passed in to instead be their elementJson
+Private Function FormatWebElementArgs(ByRef args() As Variant) As Variant
+    Dim i As Integer
+    Dim argsFormat() As Variant
+    
+    For i = 0 To UBound(args)
+        ReDim Preserve argsFormat(i)
+        
+        If TypeOf args(i) Is WebElement Then
+            Set argsFormat(i) = args(i).elementJson
+        Else
+            argsFormat(i) = args(i)
+        End If
+    Next i
+    
+    FormatWebElementArgs = argsFormat
+End Function
+
 Public Function ExecuteScript(ByVal script As String, ParamArray args() As Variant) As Variant
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
-    Dim args2() as Variant
+    Dim argsFormat() As Variant
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
-    'Change any WebElement objects passed in to instead be their elementJson
-    ReDim args2(Ubound(args))
-    Dim i As Integer
-    For i = 0 To UBound(args)
-        Set args2(i) = args(i)
-        If TypeOf args(i) Is WebElement Then Set args2(i) = args(i).elementJson
-    Next i
+    argsFormat = args   ' Pass a ParamArray to another function directly will raise "Invalid ParamArray use" Exception
+    argsFormat = FormatWebElementArgs(argsFormat)
     
     requestBody.Add "script", script
-    requestBody.Add "args", args2
+    requestBody.Add "args", argsFormat
     
     Set responseBody = SendCommand2Webdriver(W3C_EXECUTE_SCRIPT, urlParameters, requestBody)
     
@@ -728,20 +740,15 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
     Dim urlParameters As New Dictionary, _
         requestBody As New Dictionary, _
         responseBody As Dictionary
-    Dim args2() As Variant
+    Dim argsFormat() As Variant
     
     urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
     
-    'Change any WebElement objects passed in to instead be their elementJson
-    ReDim args2(UBound(args))
-    Dim i As Integer
-    For i = 0 To UBound(args)
-        Set args2(i) = args(i)
-        If TypeOf args(i) Is WebElement Then Set args2(i) = args(i).elementJson
-    Next i
+    argsFormat = args
+    argsFormat = FormatWebElementArgs(argsFormat)
     
     requestBody.Add "script", script
-    requestBody.Add "args", args2
+    requestBody.Add "args", argsFormat
     
     Set responseBody = SendCommand2Webdriver(W3C_EXECUTE_ASYNC_SCRIPT, urlParameters, requestBody)
     
