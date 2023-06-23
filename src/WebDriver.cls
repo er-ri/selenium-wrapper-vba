@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '------------------------------------------------------------------
-' SeleniumWrapperVBA v1.0.8
+' SeleniumWrapperVBA v1.1.0
 '
 ' Auther:   er-ri (https://github.com/er-ri/selenium-wrapper-vba)
 ' Date:     2022/03
@@ -51,6 +51,7 @@ Public W3C_FIND_ELEMENTS_FROM_ELEMENT
 Public W3C_FIND_ELEMENT_FROM_SHADOW_ROOT
 Public W3C_FIND_ELEMENTS_FROM_SHADOW_ROOT
 Public W3C_GET_ACTIVE_ELEMENT
+Public W3C_GET_ELEMENT_SHADOW_ROOT
 Public W3C_IS_ELEMENT_SELECTED
 Public W3C_GET_ELEMENT_ATTRIBUTE
 Public W3C_GET_ELEMENT_PROPERTY
@@ -80,6 +81,7 @@ Public W3C_TAKE_SCREENSHOT
 Public W3C_TAKE_ELEMENT_SCREENSHOT
 
 Private Const ELEMENT_KEY = "element-6066-11e4-a52e-4f735466cecf"
+Private Const SHADOWROOT_KEY = "shadow-6066-11e4-a52e-4f735466cecf"
 
 Public Enum By
     ClassName = 1
@@ -145,6 +147,7 @@ Private Sub Class_Initialize()
     W3C_FIND_ELEMENTS_FROM_ELEMENT = Array("POST", "/session/{session id}/element/{element id}/elements")
     W3C_FIND_ELEMENT_FROM_SHADOW_ROOT = Array("POST", "/session/{session id}/shadow/{shadow id}/element")
     W3C_FIND_ELEMENTS_FROM_SHADOW_ROOT = Array("POST", "/session/{session id}/shadow/{shadow id}/elements")
+    W3C_GET_ELEMENT_SHADOW_ROOT = Array("GET", "/session/{session id}/element/{element id}/shadow")
     W3C_IS_ELEMENT_SELECTED = Array("GET", "/session/{session id}/element/{element id}/selected")
     W3C_GET_ELEMENT_PROPERTY = Array("GET", "/session/{session id}/element/{element id}/property/{name}")
     W3C_GET_ELEMENT_TEXT = Array("GET", "/session/{session id}/element/{element id}/text")
@@ -612,6 +615,67 @@ Public Function FindElementsFromElement(ByVal element As WebElement, _
     FindElementsFromElement = elements
 End Function
 
+Public Function FindElementFromShadowRoot(ByVal shadowRoot As WebElement, _
+                                       ByVal by_strategy As By, _
+                                       ByVal target As String) As Variant
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary, _
+        responseBody As Dictionary
+    
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    urlParameters.Add "{shadow id}", shadowRoot.elementJson(SHADOWROOT_KEY)
+    
+    Set requestBody = SelectLocationStrategies(by_strategy, target)
+    Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENT_FROM_SHADOW_ROOT, urlParameters, requestBody)
+    
+    Set FindElementFromShadowRoot = Convert2WebElement(responseBody("value"))
+End Function
+
+Public Function FindElementsFromShadowRoot(ByVal shadowRoot As WebElement, _
+                                       ByVal by_strategy As By, _
+                                       ByVal target As String) As Variant
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary, _
+        responseBody As Dictionary
+    
+    Dim elements() As WebElement
+    FindElementsFromShadowRoot = elements
+    
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    urlParameters.Add "{shadow id}", shadowRoot.elementJson(SHADOWROOT_KEY)
+    
+    Set requestBody = SelectLocationStrategies(by_strategy, target)
+    
+    Set responseBody = SendCommand2Webdriver(W3C_FIND_ELEMENTS_FROM_SHADOW_ROOT, urlParameters, requestBody)
+    If responseBody("value").Count = 0 Then Exit Function
+    
+    Dim counter As Integer
+    Dim elementJson As Dictionary
+    ReDim elements(responseBody("value").Count - 1)
+    
+    counter = 0
+    For Each elementJson In responseBody("value")
+        ReDim Preserve elements(counter)
+        Set elements(counter) = Convert2WebElement(elementJson)
+        counter = counter + 1
+    Next
+    
+    FindElementsFromShadowRoot = elements
+End Function
+
+Public Function GetElementShadowRoot(ByVal element As WebElement) As Variant
+    Dim urlParameters As New Dictionary, _
+        requestBody As New Dictionary, _
+        responseBody As Dictionary
+        
+    urlParameters.Add "{session id}", MyOptions.Capabilities("sessionId")
+    urlParameters.Add "{element id}", element.elementJson(ELEMENT_KEY)
+    
+    Set responseBody = SendCommand2Webdriver(W3C_GET_ELEMENT_SHADOW_ROOT, urlParameters, requestBody)
+    
+    Set GetElementShadowRoot = Convert2WebElement(responseBody("value"))
+End Function
+
 Public Function GetElementAttribute(ByVal element As WebElement, _
                                     ByVal name As String)
     Dim urlParameters As New Dictionary, _
@@ -755,21 +819,6 @@ Public Function ExecuteAsyncScript(ByVal script As String, ParamArray args() As 
     ExecuteAsyncScript = responseBody("value")
 End Function
 
-Public Function AlertIsPresent() As Boolean
-    Dim alertText As String: alertText = "__NONE__"
-    On Error Resume Next
-    alertText = GetAlertText
-    On Error GoTo 0
-    AlertIsPresent = alertText <> "__NONE__"
-End Function
-
-Public Sub WaitUntilAlertIsPresent(Optional ByVal timeout As Date = #12:00:30 AM#)
-    Dim abortTime As Date
-    abortTime = Now + timeout
-    Do While Not AlertIsPresent And Now < abortTime
-        DoEvents
-    Loop
-End Sub
 
 Public Sub DismissAlert()
     Dim urlParameters As New Dictionary, _

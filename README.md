@@ -114,6 +114,22 @@ End Sub
     elementChildren() = driver.FindElementsFromElement(elmentRoot, By.TagName, "p")
 ```
 
+#### Find Element From ShadowRoot
+```vba
+    Dim element as WebElement
+    Dim elementShadowRoot As WebElement
+    Set elementShadowRoot = driver.FindElement(By.ID, "shadow_id").GetShadowRoot()
+    Set element = driver.FindElementFromShadowRoot(eleShadowRoot, By.CSS, "#shadow_css")
+```
+
+#### Find Elements From ShadowRoot
+```vba
+    Dim elements() As WebElement
+    Dim elementShadowRoot As WebElement
+    Set elementShadowRoot = driver.FindElement(By.ID, "shadow_id").GetShadowRoot()
+    elements() = driver.FindElementsFromShadowRoot(elementShadowRoot, By.CSS, "#shadow_css")
+```
+
 ### Timeouts
 #### Get Timeouts
 ```vba
@@ -258,69 +274,70 @@ End Sub
 ```
 
 ## Roadmap
-| Endpoint Node   Command        | Function Name           | Element Function Name |
-|--------------------------------|-------------------------|-----------------------|
-| New Session                    | OpenBrowser             |                       |
-| Delete Session                 | CloseBrowser            |                       |
-| Status                         | GetStatus               |                       |
-| Get Timeouts                   | GetTimeouts             |                       |
-| Set Timeouts                   | SetTimeouts             |                       |
-| Navigate To                    | NavigateTo              |                       |
-| Get Current URL                | GetCurrentURL           |                       |
-| Back                           | Back                    |                       |
-| Forward                        | Forward                 |                       |
-| Refresh                        | Refresh                 |                       |
-| Get Title                      | GetTitle                |                       |
-| Get Window Handle              | GetWindowHandle         |                       |
-| Close Window                   | CloseWindow             |                       |
-| Switch To Window               | SwitchToWindow          |                       |
-| Get Window Handles             | GetWindowHandles        |                       |
-| New Window                     | NewWindow               |                       |
-| Switch To Frame                | SwitchToFrame           |                       |
-| Switch To Parent Frame         | SwitchToParentFrame     |                       |
-| Get Window Rect                | GetWindowRect           |                       |
-| Set Window Rect                | SetWindowRect           |                       |
-| Maximize Window                | MaximizeWindow          |                       |
-| Minimize Window                | MinimizeWindow          |                       |
-| Fullscreen Window              | FullscreenWindow        |                       |
-| Get Active Element             | Not yet                 |                       |
-| Get Element Shadow Root        | Not yet                 |                       |
-| Find Element                   | FindElement             |                       |
-| Find Elements                  | FindElements            |                       |
-| Find Element From Element      | FindElementFromElement  | FindElement           |
-| Find Elements From Element     | FindElementsFromElement | FindElements          |
-| Find Element From Shadow Root  | Not yet                 |                       |
-| Find Elements From Shadow Root | Not yet                 |                       |
-| Is Element Selected            | Not yet                 |                       |
-| Get Element Attribute          | GetElementAttribute     | GetAttribute          |
-| Get Element Property           | GetElementProperty      | GetProperty           |
-| Get Element CSS Value          | Not yet                 |                       |
-| Get Element Text               | GetElementText          | GetText               |
-| Get Element Tag Name           | Not yet                 |                       |
-| Get Element Rect               | Not yet                 |                       |
-| Is Element Enabled             | Not yet                 |                       |
-| Get Computed Role              | Not yet                 |                       |
-| Get Computed Label             | Not yet                 |                       |
-| Element Click                  | ElementClick            | Click                 |
-| Element Clear                  | ElementClear            | Clear                 |
-| Element Send Keys              | *ElementSendKeys*       | *SendKeys*            |
-| Get Page Source                | GetPageSource           |                       |
-| Execute Script                 | ExecuteScript           |                       |
-| Execute Async Script           | ExecuteAsyncScript      |                       |
-| Get All Cookies                | Not yet                 |                       |
-| Get Named Cookie               | Not yet                 |                       |
-| Add Cookie                     | Not yet                 |                       |
-| Delete Cookie                  | Not yet                 |                       |
-| Delete All Cookies             | Not yet                 |                       |
-| Perform Actions                | Not yet                 |                       |
-| Release Actions                | Not yet                 |                       |
-| Dismiss Alert                  | DismissAlert            |                       |
-| Accept Alert                   | AcceptAlert             |                       |
-| Get Alert Text                 | GetAlertText            |                       |
-| Send Alert Text                | SendAlertText           |                       |
-| Take Screenshot                | TakeScreenshot          |                       |
-| Take Element Screenshot        | TakeElementScreenshot   | TakeScreenshot        |
-| Print Page                     | Not yet                 |                       |
+| Endpoint Node   Command        | Function Name              | Element Function Name |
+|--------------------------------|----------------------------|-----------------------|
+| New Session                    | OpenBrowser                |                       |
+| Delete Session                 | CloseBrowser               |                       |
+| Status                         | GetStatus                  |                       |
+| Get Timeouts                   | GetTimeouts                |                       |
+| Set Timeouts                   | SetTimeouts                |                       |
+| Navigate To                    | NavigateTo                 |                       |
+| Get Current URL                | GetCurrentURL              |                       |
+| Back                           | Back                       |                       |
+| Forward                        | Forward                    |                       |
+| Refresh                        | Refresh                    |                       |
+| Get Title                      | GetTitle                   |                       |
+| Get Window Handle              | GetWindowHandle            |                       |
+| Close Window                   | CloseWindow                |                       |
+| Switch To Window               | SwitchToWindow             |                       |
+| Get Window Handles             | GetWindowHandles           |                       |
+| New Window                     | NewWindow                  |                       |
+| Switch To Frame                | SwitchToFrame              |                       |
+| Switch To Parent Frame         | SwitchToParentFrame        |                       |
+| Get Window Rect                | GetWindowRect              |                       |
+| Set Window Rect                | SetWindowRect              |                       |
+| Maximize Window                | MaximizeWindow             |                       |
+| Minimize Window                | MinimizeWindow             |                       |
+| Fullscreen Window              | FullscreenWindow           |                       |
+| Get Active Element             | Not yet                    |                       |
+| Get Element Shadow Root        | Not yet                    |                       |
+| Find Element                   | FindElement                |                       |
+| Find Elements                  | FindElements               |                       |
+| Find Element From Element      | FindElementFromElement     | FindElement           |
+| Find Elements From Element     | FindElementsFromElement    | FindElements          |
+| Find Element From Shadow Root  | FindElementFromShadowRoot  |                       |
+| Find Elements From Shadow Root | FindElementsFromShadowRoot |                       |
+| Get Element Shadow Root        | GetElementShadowRoot       | GetShadowRoot         |
+| Is Element Selected            | Not yet                    |                       |
+| Get Element Attribute          | GetElementAttribute        | GetAttribute          |
+| Get Element Property           | GetElementProperty         | GetProperty           |
+| Get Element CSS Value          | Not yet                    |                       |
+| Get Element Text               | GetElementText             | GetText               |
+| Get Element Tag Name           | Not yet                    |                       |
+| Get Element Rect               | Not yet                    |                       |
+| Is Element Enabled             | Not yet                    |                       |
+| Get Computed Role              | Not yet                    |                       |
+| Get Computed Label             | Not yet                    |                       |
+| Element Click                  | ElementClick               | Click                 |
+| Element Clear                  | ElementClear               | Clear                 |
+| Element Send Keys              | *ElementSendKeys*          | *SendKeys*            |
+| Get Page Source                | GetPageSource              |                       |
+| Execute Script                 | ExecuteScript              |                       |
+| Execute Async Script           | ExecuteAsyncScript         |                       |
+| Get All Cookies                | Not yet                    |                       |
+| Get Named Cookie               | Not yet                    |                       |
+| Add Cookie                     | Not yet                    |                       |
+| Delete Cookie                  | Not yet                    |                       |
+| Delete All Cookies             | Not yet                    |                       |
+| Perform Actions                | Not yet                    |                       |
+| Release Actions                | Not yet                    |                       |
+| Dismiss Alert                  | DismissAlert               |                       |
+| Accept Alert                   | AcceptAlert                |                       |
+| Get Alert Text                 | GetAlertText               |                       |
+| Send Alert Text                | SendAlertText              |                       |
+| Take Screenshot                | TakeScreenshot             |                       |
+| Take Element Screenshot        | TakeElementScreenshot      | TakeScreenshot        |
+| Print Page                     | Not yet                    |                       |
 * Browser Capabilities are not listed above.
 * Key action(Such as `Enter`, `Shift`, `Control`) has not been implemented.
 

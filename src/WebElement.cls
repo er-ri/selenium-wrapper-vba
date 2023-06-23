@@ -56,6 +56,10 @@ Public Function FindElements(ByVal element As WebElement, _
     FindElements = driver.FindElementsFromElement(Me, by_strategy, target)
 End Function
 
+Public Function GetShadowRoot()
+    Set GetShadowRoot = driver.GetElementShadowRoot(Me)
+End Function
+
 Public Sub SendKeys(text As String)
     driver.ElementSendKeys text, Me
 End Sub
