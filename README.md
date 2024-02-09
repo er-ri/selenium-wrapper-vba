@@ -1,8 +1,6 @@
 # SeleniumWrapperVBA
 A Selenium-WebDriver-based browser automation framework implemented for VBA.
 
-*  [日本語](https://github.com/er-ri/selenium-wrapper-vba/blob/main/README.JA.md)
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
@@ -32,20 +30,20 @@ A Selenium-WebDriver-based browser automation framework implemented for VBA.
 </details>
 
 ## About The Project
-The project implements the `endpoint node command` defined in [W3C WebDriver specification](https://www.w3.org/TR/webdriver/#endpoints) through VBA. You can use the project to do browser automation without installing a programming language such as Python, Java, etc. However, excel and a browser-specific driver are required.
+The project implements the `endpoint node command` defined in [W3C WebDriver specification](https://www.w3.org/TR/webdriver/#endpoints) through VBA. You can use the project to do browser automation without installing a programming language such as Python, Java, etc. An MS office app and a browser-specific driver are required.
 
 ## Requirements
 1. MS Office(Excel, Word, PowerPoint, etc) 32bit or 64bit
 2. Browser's driver(Supported Browsers: Firefox, Chrome, Edge and Internet Explorer)
 
 ##  Getting Started
-1. Download the browser-specific drivers, [`geckodriver`](https://github.com/mozilla/geckodriver/releases),
-[`chromedriver`](https://chromedriver.chromium.org/), 
-[`edgedriver`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
-[`iedriver`](https://www.selenium.dev/downloads/)
-2. Import `WebDriverOptions.cls`, `WebDriver.cls`, `WebElement.cls` and `JsonConverter.bas` into your Excel. (Open VBA Editor, `Alt + F11`; File > Import File) 
+1. Download the browser-specific *drivers*, [`firefox`](https://github.com/mozilla/geckodriver/releases),
+[`chrome`](https://chromedriver.chromium.org/), 
+[`edge`](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/), or
+[`ie`](https://www.selenium.dev/downloads/).
+2. In the office, by clicking the *Developer* tab(if you enabled) or through the shortcut key `Alt + F11` to open the VBA Editor, and then import `WebDriverOptions.cls`, `WebDriver.cls`, `WebElement.cls` and `JsonConverter.bas` into your project. (*File > Import File*) 
    * where `JsonConverter.bas`, a JSON Parser for VBA created and maintained by [@timhall](https://github.com/timhall). For more details, see [`here`](https://github.com/VBA-tools/VBA-JSON).
-3. Include a reference to "Microsoft Scripting Runtime". (Tools->References Check "`Microsoft Scripting Runtime`")
+3. Include a reference to "Microsoft Scripting Runtime". (*Tools > References* Check "`Microsoft Scripting Runtime`")
 
 #### Note
 * Add browser's driver in the system `PATH`, or you can also specify the path when launching the corresponding browser's driver.
@@ -56,7 +54,7 @@ The project implements the `endpoint node command` defined in [W3C WebDriver spe
 Sub Example()
     Dim driver As New WebDriver
 
-    driver.Chrome
+    driver.Chrome "to/your/path/chromedriver.exe"
     driver.OpenBrowser
     driver.NavigateTo "https://www.python.org/"
     driver.MaximizeWindow
@@ -145,6 +143,7 @@ End Sub
     ' Set "script":40000,"pageLoad":500000,"implicit":15000
     driver.SetTimeouts 40000, 500000, 15000
 ```
+* Invoke the function before `OpenBrowser`.
 
 ### Working with iframe
 ```vba
@@ -157,8 +156,8 @@ End Sub
 ### Working with multiple windows
 ```vba
     ' Get current windows's handle.
-    Dim hwnd As String
-    hwnd = driver.GetWindowHandle
+    Dim hWnd As String
+    hWnd = driver.GetWindowHandle
     ' Get the handles of all the windows.
     Dim hWnds As New Collection
     Set hWnds = driver.GetWindowHandles
